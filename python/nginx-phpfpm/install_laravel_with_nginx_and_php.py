@@ -1,5 +1,9 @@
 import subprocess
 
+# composer 설치
+composer_install_command = "sudo apt-get install -y composer"
+subprocess.run(composer_install_command, shell=True)
+
 # Nginx 설치
 nginx_install_command = "sudo apt-get install nginx -y"
 subprocess.run(nginx_install_command, shell=True)
