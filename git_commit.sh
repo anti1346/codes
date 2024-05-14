@@ -1,5 +1,8 @@
 #!/bin/bash
 
+git config --global user.email "you@example.com"
+git config --global user.name "YourName"
+
 # 현재 시간을 변수에 저장
 current_time=$(date '+%Y%m%d-%H%M%S')
 
