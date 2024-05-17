@@ -17,7 +17,7 @@ def install_packages(packages):
 
 # 업데이트 및 필수 패키지 설치
 run_command("sudo apt-get update")
-required_packages = [f"php8.1-intl", "composer"]
+required_packages = [f"php8.1-intl", f"php8.1-mbstring", "composer"]
 install_packages(required_packages)
 
 # PHP-FPM 서비스 재시작
