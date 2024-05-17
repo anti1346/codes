@@ -5,7 +5,7 @@ php_version = "8.1"
 
 # PHP-FPM 서비스 상태 확인
 try:
-    subprocess.run(f"sudo systemctl status php{php_version}-fpm", shell=True, check=True)
+    subprocess.run(f"sudo systemctl status php{php_version}-fpm -l", shell=True, check=True)
 except subprocess.CalledProcessError as e:
     print(f"Error: PHP-FPM service for PHP {php_version} is not loaded or already removed.")
 
