@@ -42,7 +42,7 @@ server {
     error_log /var/log/nginx/default-error.log;
 
     # root /usr/share/nginx/html;
-    root /usr/share/nginx/html/laravel_project;
+    root /usr/share/nginx/html/laravel_project/public;
     
     index index.php index.html index.htm index.nginx-debian.html;
 
