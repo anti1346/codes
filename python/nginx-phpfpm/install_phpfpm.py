@@ -17,6 +17,11 @@ def install_packages(packages):
     for package in packages:
         run_command(f"sudo apt-get install -y {package}")
 
+# 패키지 삭제 함수
+def remove_packages(packages):
+    for package in packages:
+        run_command(f"sudo apt-get remove -y {package}")
+
 # PHP 버전 변수 정의
 php_version = "8.1"
 
@@ -33,13 +38,12 @@ php_packages = [f"php{php_version}-fpm", f"php{php_version}-cli", f"php{php_vers
 install_packages(php_packages)
 
 # PHP 관련 패키지 설치
-php_required_packages = [
-    f"php{php_version}-fpm", f"php{php_version}-cli", f"php{php_version}-common",
-    f"php{php_version}-dev", "php-pear", f"php{php_version}-gd", f"php{php_version}-xml",
-    f"php{php_version}-curl", f"php{php_version}-igbinary", f"php{php_version}-redis",
-    f"php{php_version}-mongodb", f"php{php_version}-zip", f"php{php_version}-imagick"
-]
+php_required_packages = [f"php-pear", f"php{php_version}-gd", f"php{php_version}-xml", f"php{php_version}-curl", f"php{php_version}-igbinary"]
 install_packages(php_required_packages)
+
+# PHP 모듈 설치
+php_modules_packages = [f"php{php_version}-redis", f"php{php_version}-mongodb", f"php{php_version}-zip", f"php{php_version}-imagick"]
+install_packages(php_modules_packages)
 
 # librdkafka-dev 및 rdkafka 설치 및 활성화
 run_command("sudo apt-get install -y librdkafka-dev")
@@ -186,6 +190,10 @@ run_command("echo '<?php phpinfo();' | sudo tee /usr/share/nginx/html/test.php")
 
 # NGINX 재시작
 run_command("sudo systemctl restart nginx")
+
+# PHP-FPM(php8.3) 패키지 삭제
+required_packages = ["php8.3-common", "php8.3-xml"]
+remove_packages(required_packages)
 
 # PHP 설정 파일 확인
 run_command(f"php --ini | egrep 'Loaded Configuration File'")
