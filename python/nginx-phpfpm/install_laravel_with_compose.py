@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 # 실행 결과를 출력하는 함수
@@ -23,8 +24,13 @@ install_packages(required_packages)
 # PHP-FPM 서비스 재시작
 run_command("sudo systemctl restart php8.1-fpm")
 
+# composer 설치
+composer_install_command = "sudo apt-get install -y composer"
+subprocess.run(composer_install_command, shell=True)
+
 # Laravel 설치
-run_command("composer global require laravel/installer")
+laravel_install_command = "composer global require laravel/installer"
+subprocess.run(laravel_install_command, shell=True)
 
 # Nginx 설정 파일 업데이트
 nginx_conf_default_content = """
@@ -83,17 +89,24 @@ with open('/etc/nginx/conf.d/default.conf', 'w') as file:
     file.write(nginx_conf_default_content)
 print("Configuration file '/etc/nginx/conf.d/default.conf' created.")
 
-# Laravel 프로젝트 생성
+# Laravel 프로젝트 생성 디렉토리가 존재하고 비어 있지 않으면 삭제
 laravel_project_path = "/usr/share/nginx/html"
 laravel_project_name = "laravel_project"
+laravel_project_full_path = os.path.join(laravel_project_path, laravel_project_name)
+
+if os.path.exists(laravel_project_full_path) and os.listdir(laravel_project_full_path):
+    run_command(f"sudo rm -rf {laravel_project_full_path}")
+
+# Laravel 프로젝트 생성
 laravel_create_command = f"cd {laravel_project_path} && composer create-project --prefer-dist laravel/laravel {laravel_project_name}"
 run_command(laravel_create_command)
 
 # Laravel 프로젝트 디렉토리 권한 설정
-laravel_chmod_command = f"sudo chown -R www-data:www-data {laravel_project_path}/{laravel_project_name}"
+laravel_chmod_command = f"sudo chown -R www-data:www-data {laravel_project_full_path}"
 run_command(laravel_chmod_command)
 
 # Nginx 서비스 재시작
-run_command("sudo systemctl restart nginx")
+nginx_restart_command = "sudo systemctl restart nginx"
+run_command(nginx_restart_command)
 
 print("Laravel 설치 및 연동이 완료되었습니다.")
