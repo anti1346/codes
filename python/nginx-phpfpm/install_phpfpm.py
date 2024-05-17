@@ -83,7 +83,7 @@ with open(f'/etc/php/{php_version}/fpm/php-fpm.conf', 'w') as file:
 print(f"Configuration file '/etc/php/{php_version}/fpm/php-fpm.conf' created.")
 
 # PHP-FPM www.conf 설정 추가
-www_conf_content = f"""
+www_conf_content = """
 [www]
 ; 사용자와 그룹 설정
 user = www-data
