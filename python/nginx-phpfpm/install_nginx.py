@@ -1,20 +1,24 @@
 import subprocess
 
 def run_command(command):
+    # subprocess.run()으로 명령어 실행하고 stdout, stderr를 분리하여 출력합니다.
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     if result.returncode != 0:
+        # 명령어 실행 실패 시 에러 메시지 출력하고 종료합니다.
         print(f"Command failed: {command}")
         print(result.stderr)
         exit(1)
     else:
+        # 명령어 실행 성공 시 표준 출력을 출력합니다.
         print(result.stdout)
 
 # 업데이트
 run_command("sudo apt-get update")
 
 # 필수 패키지 설치
-run_command("sudo apt-get install -y curl gnupg2 ca-certificates lsb-release")
-run_command("sudo apt-get install -y ubuntu-keyring apt-transport-https")
+required_packages = ["curl", "gnupg2", "ca-certificates", "lsb-release", "ubuntu-keyring", "apt-transport-https"]
+for package in required_packages:
+    run_command(f"sudo apt-get install -y {package}")
 
 # NGINX 키 설치
 run_command("curl -s https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null")
@@ -24,7 +28,8 @@ run_command("gpg --dry-run --quiet --no-keyring --import --import-options import
 
 # NGINX 저장소 추가
 lsb_release = subprocess.run("lsb_release -cs", shell=True, capture_output=True, text=True).stdout.strip()
-run_command(f'echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu {lsb_release} nginx" | sudo tee /etc/apt/sources.list.d/nginx.list')
+nginx_repo_command = f'echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu {lsb_release} nginx" | sudo tee /etc/apt/sources.list.d/nginx.list'
+run_command(nginx_repo_command)
 
 # 업데이트
 run_command("sudo apt-get update")
@@ -48,37 +53,7 @@ with open(nginx_conf_path, 'r') as file:
 
 http_index = next(i for i, line in enumerate(nginx_conf) if line.strip() == "http {")
 server_block = """
-    user  www-data;
-    worker_processes  auto;
-    
-    error_log  /var/log/nginx/error.log notice;
-    pid        /var/run/nginx.pid;
-    
-    events {
-        worker_connections  1024;
-    }
-    
-    http {
-        include       /etc/nginx/mime.types;
-        default_type  application/octet-stream;
-    
-        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                          '$status $body_bytes_sent "$http_referer" '
-                          '"$http_user_agent" "$http_x_forwarded_for"';
-    
-        access_log  /var/log/nginx/access.log  main;
-
-        server_tokens off
-    
-        sendfile        on;
-        #tcp_nopush     on;
-    
-        keepalive_timeout  65;
-    
-        #gzip  on;
-    
-        include /etc/nginx/conf.d/*.conf;
-    }
+    server_tokens off;
 """
 nginx_conf.insert(http_index + 1, server_block)
 
@@ -88,30 +63,17 @@ with open(nginx_conf_path, 'w') as file:
 # default.conf 설정 추가
 nginx_conf_default_path = "/etc/nginx/conf.d/default.conf"
 with open(nginx_conf_default_path, 'r') as file:
-    nginx_conf_default_path = file.readlines()
+    nginx_conf_default = file.readlines()
 
-http_index = next(i for i, line in enumerate(nginx_conf) if line.strip() == "http {")
+http_index = next(i for i, line in enumerate(nginx_conf_default) if line.strip() == "http {")
 server_block = """
     server {
         listen       80;
-        server_name _;
-    
-        #access_log  /var/log/nginx/host.access.log  main;
-    
+        server_name  _;
         location / {
             root   /usr/share/nginx/html;
             index  index.html index.htm;
         }
-    
-        #error_page  404              /404.html;
-    
-        # redirect server error pages to the static page /50x.html
-        #
-        error_page   500 502 503 504  /50x.html;
-        location = /50x.html {
-            root   /usr/share/nginx/html;
-        }
-    
         location /nginx_status {
             stub_status;
             access_log off;
@@ -119,20 +81,18 @@ server_block = """
             allow 192.168.56.0/24;
             deny all;
         }
-        
         location ~ /\.ht {
             deny  all;
         }
     }
 """
-nginx_conf_default_path.insert(http_index + 1, server_block)
+nginx_conf_default.insert(http_index + 1, server_block)
 
-with open(nginx_conf_path, 'w') as file:
-    file.writelines(nginx_conf)
+with open(nginx_conf_default_path, 'w') as file:
+    file.writelines(nginx_conf_default)
 
 # NGINX 설정 테스트
 run_command("nginx -t")
 
 # NGINX 재시작
 run_command("sudo systemctl restart nginx")
-
