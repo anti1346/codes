@@ -129,3 +129,5 @@ run_command("sudo systemctl restart nginx")
 
 # curl 명령어를 통한 nginx 상태 확인
 run_command("curl localhost/nginx_status")
+
+print("Nginx 설치가 완료되었습니다.")
