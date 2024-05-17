@@ -1,4 +1,33 @@
+import os
 import subprocess
+
+# 실행 결과를 출력하는 함수
+def run_command(command):
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"Command failed: {command}")
+        print(result.stderr)
+        exit(1)
+    else:
+        print(result.stdout)
+
+# 패키지 설치 함수
+def install_packages(packages):
+    for package in packages:
+        run_command(f"sudo apt-get install -y {package}")
+
+# PHP 버전 변수 정의
+php_version = "8.1"
+
+# 필수 패키지 설치
+required_packages = [f"php{php_version}-intl"]
+install_packages(required_packages)
+
+# 업데이트
+run_command("sudo apt-get update")
+
+# PHP-FPM 서비스 재시작
+run_command(f"sudo systemctl restart php{php_version}-fpm")
 
 # composer 설치
 composer_install_command = "sudo apt-get install -y composer"
@@ -17,7 +46,8 @@ server {
     access_log /var/log/nginx/default-access.log main;
     error_log /var/log/nginx/default-error.log;
 
-    root /usr/share/nginx/html;
+    # root /usr/share/nginx/html;
+    root /usr/share/nginx/html/laravel_project;
     
     index index.php index.html index.htm index.nginx-debian.html;
 
