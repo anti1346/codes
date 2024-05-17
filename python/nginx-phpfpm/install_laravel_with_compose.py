@@ -4,50 +4,68 @@ import subprocess
 composer_install_command = "sudo apt-get install -y composer"
 subprocess.run(composer_install_command, shell=True)
 
-# Nginx 설치
-nginx_install_command = "sudo apt-get install nginx -y"
-subprocess.run(nginx_install_command, shell=True)
-
-# PHP-FPM 설치
-php_install_command = "sudo apt-get install php-fpm -y"
-subprocess.run(php_install_command, shell=True)
-
 # Laravel 설치
 laravel_install_command = "composer global require laravel/installer"
 subprocess.run(laravel_install_command, shell=True)
 
 # Nginx 설정 파일 업데이트
-nginx_config = """
+nginx_conf_default_content = """
 server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    server_name example.com;
-    root /var/www/html/public;
+    listen 80;
+    server_name _;
+    
+    access_log /var/log/nginx/default-access.log main;
+    error_log /var/log/nginx/default-error.log;
 
+    root /usr/share/nginx/html;
+    
     index index.php index.html index.htm index.nginx-debian.html;
 
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }
-
+    
+    # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
     location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock; # PHP 버전에 따라 변경
+        try_files $uri =404;
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+        fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
     }
 
-    location ~ /\.ht {
+    # nginx status
+    location /nginx_status {
+        stub_status;
+        access_log off;
+        allow 127.0.0.1;
+        allow 192.168.56.0/24;
         deny all;
+    }
+
+    # php-fpm status
+    location ~ ^/(status|ping)$ {
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        allow 127.0.0.1;
+        deny all;
+        access_log off;
+    }
+    
+    location ~ /\.ht {
+        deny  all;
     }
 }
 """
-nginx_config_file_path = "/etc/nginx/sites-available/default"
-with open(nginx_config_file_path, "w") as nginx_config_file:
-    nginx_config_file.write(nginx_config)
+with open('/etc/nginx/conf.d/default.conf', 'w') as file:
+    file.write(nginx_conf_default_content)
+print("Configuration file '/etc/nginx/conf.d/default.conf' created.")
 
 # Laravel 프로젝트 생성
-laravel_project_path = "/var/www/html"
+laravel_project_path = "/usr/share/nginx/html"
 laravel_project_name = "laravel_project"
 laravel_create_command = f"cd {laravel_project_path} && composer create-project --prefer-dist laravel/laravel {laravel_project_name}"
 subprocess.run(laravel_create_command, shell=True)
@@ -60,4 +78,4 @@ subprocess.run(laravel_chmod_command, shell=True)
 nginx_restart_command = "sudo systemctl restart nginx"
 subprocess.run(nginx_restart_command, shell=True)
 
-print("Nginx, PHP-FPM, Laravel 설치 및 연동이 완료되었습니다.")
+print("Laravel 설치 및 연동이 완료되었습니다.")
