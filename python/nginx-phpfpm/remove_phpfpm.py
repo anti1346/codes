@@ -13,7 +13,7 @@ commands = [
     # 사용하지 않는 패키지 자동 제거
     "sudo apt-get autoremove -y",
     # 설정 파일 및 로그 파일 삭제
-    "sudo rm -rf /etc/php/ /var/log/php/",
+    "sudo rm -rf /etc/php /usr/share/php /usr/lib/php /var/log/php /run/php",
     # APT 패키지 캐시 정리
     "sudo apt-get clean"
 ]
