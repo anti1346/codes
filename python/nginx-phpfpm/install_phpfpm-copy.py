@@ -84,6 +84,7 @@ run_command("sudo systemctl restart nginx")
 # PHP-FPM(php8.3) 패키지 삭제
 required_packages = ["php8.3-common", "php8.3-xml"]
 remove_packages(required_packages)
+run_command("sudo dpkg --purge $(dpkg -l | awk '/^rc/ { print $2 }')")
 
 # PHP 설정 파일 확인
 run_command(f"php --ini | egrep 'Loaded Configuration File'")

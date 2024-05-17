@@ -139,7 +139,7 @@ server {
     server_name _;
     
     access_log /var/log/nginx/default-access.log main;
-    error_log  /var/log/nginx/default-error.log;
+    error_log /var/log/nginx/default-error.log;
 
     location / {
         root   /usr/share/nginx/html;
@@ -164,6 +164,7 @@ server {
         allow 192.168.56.0/24;
         deny all;
     }
+
     # php-fpm status
     location ~ ^/(status|ping)$ {
         fastcgi_pass unix:/run/php/php-fpm.sock;
@@ -191,12 +192,16 @@ print("Configuration file '/etc/nginx/conf.d/default.conf' created.")
 # phpinfo 파일 생성
 run_command("echo '<?php phpinfo();' | sudo tee /usr/share/nginx/html/test.php")
 
-# NGINX 재시작
-run_command("sudo systemctl restart nginx")
-
 # PHP-FPM(php8.3) 패키지 삭제
 required_packages = ["php8.3-common", "php8.3-xml"]
 remove_packages(required_packages)
+run_command("sudo dpkg --purge $(dpkg -l | awk '/^rc/ { print $2 }')")
+
+# PHP-FPM 재시작
+run_command(f"sudo systemctl restart php{php_version}-fpm")
+
+# NGINX 재시작
+run_command("sudo systemctl restart nginx")
 
 # PHP 설정 파일 확인
 run_command(f"php --ini | egrep 'Loaded Configuration File'")
@@ -208,6 +213,6 @@ run_command(f"php-fpm{php_version} --version")
 run_command(f"php -m | egrep 'redis|mongodb|zip|imagick|rdkafka'")
 
 # curl 명령어를 통한 PHP-FPM 상태 확인
-run_command("curl localhost/status")
+run_command("curl http://localhost/status")
 
 print(f"PHP-FPM {php_version} 및 관련 모듈 설치가 완료되었습니다.")

@@ -128,9 +128,9 @@ run_command("nginx -t")
 run_command("sudo systemctl restart nginx")
 
 # Test 파일 생성
-run_command("echo '$ServerName' | sudo tee /usr/share/nginx/html/test.html")
+run_command("echo 'ServerName' | sudo tee /usr/share/nginx/html/test.html")
 
 # curl 명령어를 통한 nginx 상태 확인
-run_command("curl localhost/nginx_status")
+run_command("curl http://localhost/nginx_status")
 
 print("Nginx 설치가 완료되었습니다.")
