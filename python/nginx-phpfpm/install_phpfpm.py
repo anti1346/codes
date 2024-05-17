@@ -193,7 +193,10 @@ run_command(f"php --ini | egrep 'Loaded Configuration File'")
 # PHP-FPM 버전 확인
 run_command(f"php-fpm{php_version} --version")
 
-# PHP 모듈 확인
+# PHP-FPM 모듈 확인
 run_command(f"php -m | egrep 'redis|mongodb|zip|imagick|rdkafka'")
 
-print(f"PHP {php_version} 및 관련 모듈 설치가 완료되었습니다.")
+# curl 명령어를 통한 PHP-FPM 상태 확인
+run_command("curl localhost/status")
+
+print(f"PHP-FPM {php_version} 및 관련 모듈 설치가 완료되었습니다.")
