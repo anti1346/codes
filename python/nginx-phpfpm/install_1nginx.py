@@ -56,31 +56,32 @@ run_command(f"sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf_{now}")
 run_command(f"sudo cp /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf_{now}")
 
 # NGINX 설정 추가
+#############################################################################
 nginx_conf_content = """
-user  www-data;
-worker_processes  auto;
+user www-data www-data;
+worker_processes auto;
 
-pid        /var/run/nginx.pid;
+pid /var/run/nginx.pid;
 
 events {
-    worker_connections  1024;
+    worker_connections 1024;
 }
 
 http {
-    include       /etc/nginx/mime.types;
-    default_type  application/octet-stream;
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
 
     log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
 
-    access_log  /var/log/nginx/access.log  main;
-    error_log   /var/log/nginx/error.log;
+    access_log /var/log/nginx/access.log main;
+    error_log /var/log/nginx/error.log;
 
     server_tokens off;
 
     sendfile on;
-    keepalive_timeout  65;
+    keepalive_timeout 65;
     
     gzip on;
 
@@ -92,24 +93,25 @@ with open('/etc/nginx/nginx.conf', 'w') as file:
 print("Configuration file '/etc/nginx/nginx.conf' created.")
 
 # default.conf 설정 추가
+#############################################################################
 nginx_conf_default_content = """
 server {
     listen 80;
     server_name _;
     
     access_log /var/log/nginx/default-access.log main;
-    error_log  /var/log/nginx/default-error.log;
+    error_log /var/log/nginx/default-error.log;
     
     location / {
-        root   /usr/share/nginx/html;
-        index  index.html index.htm;
+        root /usr/share/nginx/html;
+        index index.html index.htm;
     }
     
     location /nginx_status {
         stub_status;
         access_log off;
         allow 127.0.0.1;
-        allow 192.168.56.0/24;
+        allow 0.0.0.0/0;
         deny all;
     }
     

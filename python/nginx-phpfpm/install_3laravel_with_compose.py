@@ -37,14 +37,12 @@ nginx_conf_default_content = """
 server {
     listen 80;
     server_name _;
+    # root /usr/share/nginx/html;
+    root /usr/share/nginx/html/laravel_project/public;
+    index index.php index.html index.htm index.nginx-debian.html;
     
     access_log /var/log/nginx/default-access.log main;
     error_log /var/log/nginx/default-error.log;
-
-    # root /usr/share/nginx/html;
-    root /usr/share/nginx/html/laravel_project/public;
-    
-    index index.php index.html index.htm index.nginx-debian.html;
 
     location / {
         try_files $uri $uri/ /index.php?$query_string;
@@ -108,5 +106,8 @@ run_command(laravel_chmod_command)
 # Nginx 서비스 재시작
 nginx_restart_command = "sudo systemctl restart nginx"
 run_command(nginx_restart_command)
+
+# curl 명령어를 통한 PHP-FPM 상태 확인
+run_command("curl -I http://localhost/index.php")
 
 print("Laravel 설치 및 연동이 완료되었습니다.")
