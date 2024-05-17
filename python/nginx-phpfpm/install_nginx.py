@@ -41,32 +41,32 @@ run_command("sudo systemctl --now enable nginx")
 # NGINX 상태 확인
 run_command("sudo systemctl status nginx")
 
-# nginx.conf 설정 추가
-nginx_conf_path = "/etc/nginx/nginx.conf"
-with open(nginx_conf_path, 'r') as file:
-    nginx_conf = file.readlines()
+# # nginx.conf 설정 추가
+# nginx_conf_path = "/etc/nginx/nginx.conf"
+# with open(nginx_conf_path, 'r') as file:
+#     nginx_conf = file.readlines()
 
-http_index = next(i for i, line in enumerate(nginx_conf) if line.strip() == "http {")
-server_block = """
-    server_tokens off;
+# http_index = next(i for i, line in enumerate(nginx_conf) if line.strip() == "http {")
+# server_block = """
+#     server_tokens off;
 
-    server {
-        listen 80;
-        server_name _;
+#     server {
+#         listen 80;
+#         server_name _;
 
-        location /nginx_status {
-            stub_status;
-            access_log off;
-            allow 127.0.0.1;
-            allow 192.168.56.0/24;
-            deny all;
-        }
-    }
-"""
-nginx_conf.insert(http_index + 1, server_block)
+#         location /nginx_status {
+#             stub_status;
+#             access_log off;
+#             allow 127.0.0.1;
+#             allow 192.168.56.0/24;
+#             deny all;
+#         }
+#     }
+# """
+# nginx_conf.insert(http_index + 1, server_block)
 
-with open(nginx_conf_path, 'w') as file:
-    file.writelines(nginx_conf)
+# with open(nginx_conf_path, 'w') as file:
+#     file.writelines(nginx_conf)
 
 # NGINX 설정 테스트
 run_command("nginx -t")
