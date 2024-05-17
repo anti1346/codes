@@ -68,7 +68,7 @@ run_command(f"sudo sed -i 's/expose_php = On/expose_php = Off/g' /etc/php/{php_v
 # PHP-FPM 설정 테스트
 run_command(f"php-fpm{php_version} -t")
 
-# php-fpm.conf 설정 추가
+# PHP-FPM php-fpm.conf 설정 추가
 php_fpm_conf_content = """
 include = /etc/php/php-fpm/fpm/pool.d/*.conf
 
@@ -77,14 +77,13 @@ pid = /run/php/php-fpm.pid
 error_log = /var/log/php-fpm/php-fpm.log
 daemonize = yes
 """
+# php-fpm.conf 파일 쓰기
 with open(f'/etc/php/{php_version}/fpm/php-fpm.conf', 'w') as file:
     file.write(php_fpm_conf_content)
 print(f"Configuration file '/etc/php/{php_version}/fpm/php-fpm.conf' created.")
 
-# www.conf 설정 추가
+# PHP-FPM www.conf 설정 추가
 www_conf_content = f"""
-# PHP-FPM www.conf 설정 파일
-
 [www]
 ; 사용자와 그룹 설정
 user = www-data
@@ -115,13 +114,12 @@ slowlog = /var/log/php-fpm/www-slow.log
 
 ; 액세스 로그 설정
 access.log = /var/log/php-fpm/www-access.log
-access.format = "[%t] %m %{REQUEST_SCHEME}e://%{HTTP_HOST}e%{REQUEST_URI}e %f pid:%p TIME:%ds MEM:%{mega}Mmb CPU:%C%% status:%s {%{REMOTE_ADDR}e|%{HTTP_USER_AGENT}e}"
+access.format = "[%%t] %%m %{{REQUEST_SCHEME}}e://%%{HTTP_HOST}e%%{REQUEST_URI}e %%f pid:%%p TIME:%%ds MEM:%%{{mega}}Mmb CPU:%%C%% status:%%s {%%{REMOTE_ADDR}e|%%{HTTP_USER_AGENT}e}"
 
 ; 에러 로그 및 로그 기록 활성화 설정
 php_admin_value[error_log] = /var/log/php-fpm/www-error.log
 php_admin_flag[log_errors] = on
 """
-
 # www.conf 파일 쓰기
 www_conf_file = f'/etc/php/{php_version}/fpm/pool.d/www.conf'
 try:
@@ -182,6 +180,7 @@ server {
     }
 }
 """
+# default.conf 파일 쓰기
 with open('/etc/nginx/conf.d/default.conf', 'w') as file:
     file.write(nginx_conf_default_content)
 print("Configuration file '/etc/nginx/conf.d/default.conf' created.")
