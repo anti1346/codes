@@ -17,6 +17,11 @@ def install_packages(packages):
     for package in packages:
         run_command(f"sudo apt-get install -y {package}")
 
+# 패키지 삭제 함수
+def remove_packages(packages):
+    for package in packages:
+        run_command(f"sudo apt-get remove -y {package}")
+
 # PHP 버전 변수 정의
 php_version = "8.1"
 
@@ -34,12 +39,14 @@ install_packages(php_packages)
 
 # PHP 관련 패키지 설치
 php_required_packages = [
-    f"php{php_version}-fpm", f"php{php_version}-cli", f"php{php_version}-common",
-    f"php{php_version}-dev", "php-pear", f"php{php_version}-gd", f"php{php_version}-xml",
-    f"php{php_version}-curl", f"php{php_version}-igbinary", f"php{php_version}-redis",
-    f"php{php_version}-mongodb", f"php{php_version}-zip", f"php{php_version}-imagick"
+    f"php-pear", f"php{php_version}-gd", f"php{php_version}-xml", f"php{php_version}-curl",
+    f"php{php_version}-igbinary", f"php{php_version}-zip"
 ]
 install_packages(php_required_packages)
+
+# PHP 모듈 설치
+php_modules_packages = [f"php{php_version}-redis", f"php{php_version}-mongodb", f"php{php_version}-imagick"]
+install_packages(php_modules_packages)
 
 # librdkafka-dev 및 rdkafka 설치 및 활성화
 run_command("sudo apt-get install -y librdkafka-dev")
@@ -56,6 +63,9 @@ run_command(f"sudo cp /etc/php/{php_version}/fpm/pool.d/www.conf /etc/php/{php_v
 # PHP-FPM 로그 디렉토리 생성
 os.makedirs('/var/log/php-fpm', exist_ok=True)
 
+# PHP-FPM 디렉토리 심볼릭 링크 설정
+run_command(f"sudo ln -s /etc/php/{php_version} /etc/php/php-fpm")
+
 # PHP-FPM 서비스 활성화 및 시작
 run_command(f"sudo systemctl --now enable php{php_version}-fpm")
 
@@ -71,13 +81,20 @@ run_command("echo '<?php phpinfo();' | sudo tee /usr/share/nginx/html/test.php")
 # NGINX 재시작
 run_command("sudo systemctl restart nginx")
 
+# PHP-FPM(php8.3) 패키지 삭제
+required_packages = ["php8.3-common", "php8.3-xml"]
+remove_packages(required_packages)
+
 # PHP 설정 파일 확인
 run_command(f"php --ini | egrep 'Loaded Configuration File'")
 
 # PHP-FPM 버전 확인
 run_command(f"php-fpm{php_version} --version")
 
-# PHP 모듈 확인
+# PHP-FPM 모듈 확인
 run_command(f"php -m | egrep 'redis|mongodb|zip|imagick|rdkafka'")
 
-print(f"PHP {php_version} 및 관련 모듈 설치가 완료되었습니다.")
+# curl 명령어를 통한 PHP-FPM 상태 확인
+run_command("curl localhost/status")
+
+print(f"PHP-FPM {php_version} 및 관련 모듈 설치가 완료되었습니다.")

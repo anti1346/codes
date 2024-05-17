@@ -84,7 +84,7 @@ pid = /run/php/php-fpm.pid
 error_log = /var/log/php-fpm/php-fpm.log
 daemonize = yes
 """
-# php-fpm.conf 파일 쓰기
+# PHP-FPM php-fpm.conf 파일 쓰기
 with open(f'/etc/php/{php_version}/fpm/php-fpm.conf', 'w') as file:
     file.write(php_fpm_conf_content)
 print(f"Configuration file '/etc/php/{php_version}/fpm/php-fpm.conf' created.")
@@ -127,12 +127,12 @@ access.format = "[%t] %m %{REQUEST_SCHEME}e://%{HTTP_HOST}e%{REQUEST_URI}e %f pi
 php_admin_value[error_log] = /var/log/php-fpm/www-error.log
 php_admin_flag[log_errors] = on
 """
-# www.conf 파일 쓰기
+# PHP-FPM www.conf 파일 쓰기
 with open('/etc/php/{php_version}/fpm/pool.d/www.conf', 'w') as file:
     file.write(www_conf_content)
 print("Configuration file '/etc/php/{php_version}/fpm/pool.d/www.conf' created.")
 
-# default.conf 설정 추가
+# NGINX default.conf 설정 추가
 nginx_conf_default_content = """
 server {
     listen 80;
@@ -183,7 +183,7 @@ server {
     }
 }
 """
-# default.conf 파일 쓰기
+# NGINX default.conf 파일 쓰기
 with open('/etc/nginx/conf.d/default.conf', 'w') as file:
     file.write(nginx_conf_default_content)
 print("Configuration file '/etc/nginx/conf.d/default.conf' created.")
