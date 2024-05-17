@@ -114,7 +114,7 @@ slowlog = /var/log/php-fpm/www-slow.log
 
 ; 액세스 로그 설정
 access.log = /var/log/php-fpm/www-access.log
-access.format = "[%%t] %%m %{{REQUEST_SCHEME}}e://%%{HTTP_HOST}e%%{REQUEST_URI}e %%f pid:%%p TIME:%%ds MEM:%%{{mega}}Mmb CPU:%%C%% status:%%s {%%{REMOTE_ADDR}e|%%{HTTP_USER_AGENT}e}"
+access.format = "[%t] %m %{REQUEST_SCHEME}e://%{HTTP_HOST}e%{REQUEST_URI}e %f pid:%p TIME:%ds MEM:%{mega}Mmb CPU:%C%% status:%s {%{REMOTE_ADDR}e|%{HTTP_USER_AGENT}e}"
 
 ; 에러 로그 및 로그 기록 활성화 설정
 php_admin_value[error_log] = /var/log/php-fpm/www-error.log
