@@ -3,12 +3,6 @@ import subprocess
 # PHP 버전 변수 정의
 php_version = "8.1"
 
-# PHP-FPM 서비스 상태 확인
-try:
-    subprocess.run(f"sudo systemctl status php{php_version}-fpm -l", shell=True, check=True)
-except subprocess.CalledProcessError as e:
-    print(f"Error: PHP-FPM service for PHP {php_version} is not loaded or already removed.")
-
 # 명령어 리스트
 commands = [
     # PHP-FPM 서비스 중지 및 비활성화
