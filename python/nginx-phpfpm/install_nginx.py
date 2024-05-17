@@ -41,32 +41,94 @@ run_command("sudo systemctl --now enable nginx")
 # NGINX 상태 확인
 run_command("sudo systemctl status nginx")
 
-# # nginx.conf 설정 추가
-# nginx_conf_path = "/etc/nginx/nginx.conf"
-# with open(nginx_conf_path, 'r') as file:
-#     nginx_conf = file.readlines()
+# nginx.conf 설정 추가
+nginx_conf_path = "/etc/nginx/nginx.conf"
+with open(nginx_conf_path, 'r') as file:
+    nginx_conf = file.readlines()
 
-# http_index = next(i for i, line in enumerate(nginx_conf) if line.strip() == "http {")
-# server_block = """
-#     server_tokens off;
+http_index = next(i for i, line in enumerate(nginx_conf) if line.strip() == "http {")
+server_block = """
+    user  www-data;
+    worker_processes  auto;
+    
+    error_log  /var/log/nginx/error.log notice;
+    pid        /var/run/nginx.pid;
+    
+    events {
+        worker_connections  1024;
+    }
+    
+    http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+    
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                          '$status $body_bytes_sent "$http_referer" '
+                          '"$http_user_agent" "$http_x_forwarded_for"';
+    
+        access_log  /var/log/nginx/access.log  main;
 
-#     server {
-#         listen 80;
-#         server_name _;
+        server_tokens off
+    
+        sendfile        on;
+        #tcp_nopush     on;
+    
+        keepalive_timeout  65;
+    
+        #gzip  on;
+    
+        include /etc/nginx/conf.d/*.conf;
+    }
+"""
+nginx_conf.insert(http_index + 1, server_block)
 
-#         location /nginx_status {
-#             stub_status;
-#             access_log off;
-#             allow 127.0.0.1;
-#             allow 192.168.56.0/24;
-#             deny all;
-#         }
-#     }
-# """
-# nginx_conf.insert(http_index + 1, server_block)
+with open(nginx_conf_path, 'w') as file:
+    file.writelines(nginx_conf)
 
-# with open(nginx_conf_path, 'w') as file:
-#     file.writelines(nginx_conf)
+# default.conf 설정 추가
+nginx_conf_default_path = "/etc/nginx/conf.d/default.conf"
+with open(nginx_conf_default_path, 'r') as file:
+    nginx_conf_default_path = file.readlines()
+
+http_index = next(i for i, line in enumerate(nginx_conf) if line.strip() == "http {")
+server_block = """
+    server {
+        listen       80;
+        server_name _;
+    
+        #access_log  /var/log/nginx/host.access.log  main;
+    
+        location / {
+            root   /usr/share/nginx/html;
+            index  index.html index.htm;
+        }
+    
+        #error_page  404              /404.html;
+    
+        # redirect server error pages to the static page /50x.html
+        #
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+    
+        location /nginx_status {
+            stub_status;
+            access_log off;
+            allow 127.0.0.1;
+            allow 192.168.56.0/24;
+            deny all;
+        }
+        
+        location ~ /\.ht {
+            deny  all;
+        }
+    }
+"""
+nginx_conf_default_path.insert(http_index + 1, server_block)
+
+with open(nginx_conf_path, 'w') as file:
+    file.writelines(nginx_conf)
 
 # NGINX 설정 테스트
 run_command("nginx -t")
