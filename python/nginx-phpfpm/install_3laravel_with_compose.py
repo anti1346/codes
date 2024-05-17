@@ -39,7 +39,7 @@ server {
     server_name _;
     # root /usr/share/nginx/html;
     root /usr/share/nginx/html/laravel_project/public;
-    index index.php index.html index.htm index.nginx-debian.html;
+    index index.php index.html;
     
     access_log /var/log/nginx/default-access.log main;
     error_log /var/log/nginx/default-error.log;
