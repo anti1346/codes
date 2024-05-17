@@ -1,4 +1,5 @@
 import subprocess
+import datetime
 
 def run_command(command):
     """명령어를 실행하고 결과를 출력합니다."""
@@ -48,12 +49,16 @@ run_command("sudo systemctl --now enable nginx")
 # NGINX 상태 확인
 run_command("sudo systemctl status nginx")
 
+# NGINX 설정 파일 백업
+now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+run_command(f"sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf_{now}")
+run_command(f"sudo cp /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf_{now}")
+
 # NGINX 설정 추가
 nginx_conf_content = """
 user  www-data;
 worker_processes  auto;
 
-error_log  /var/log/nginx/error.log notice;
 pid        /var/run/nginx.pid;
 
 events {
@@ -69,11 +74,14 @@ http {
                       '"$http_user_agent" "$http_x_forwarded_for"';
 
     access_log  /var/log/nginx/access.log  main;
+    error_log   /var/log/nginx/error.log;
 
     server_tokens off;
 
-    sendfile        on;
+    sendfile on;
     keepalive_timeout  65;
+    
+    gzip on;
 
     include /etc/nginx/conf.d/*.conf;
 }
@@ -85,12 +93,17 @@ print("Configuration file '/etc/nginx/nginx.conf' created.")
 # default.conf 설정 추가
 nginx_conf_default_content = """
 server {
-    listen       80;
-    server_name  _;
+    listen 80;
+    server_name _;
+    
+    access_log /var/log/nginx/default-access.log main;
+    error_log  /var/log/nginx/default-error.log;
+    
     location / {
         root   /usr/share/nginx/html;
         index  index.html index.htm;
     }
+    
     location /nginx_status {
         stub_status;
         access_log off;
@@ -98,6 +111,7 @@ server {
         allow 192.168.56.0/24;
         deny all;
     }
+    
     location ~ /\.ht {
         deny  all;
     }
@@ -112,3 +126,6 @@ run_command("nginx -t")
 
 # NGINX 재시작
 run_command("sudo systemctl restart nginx")
+
+# curl 명령어를 통한 nginx 상태 확인
+run_command("curl localhost/nginx_status")
