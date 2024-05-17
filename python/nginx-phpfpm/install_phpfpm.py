@@ -121,13 +121,9 @@ php_admin_value[error_log] = /var/log/php-fpm/www-error.log
 php_admin_flag[log_errors] = on
 """
 # www.conf 파일 쓰기
-www_conf_file = f'/etc/php/{php_version}/fpm/pool.d/www.conf'
-try:
-    with open(www_conf_file, 'w') as file:
-        file.write(www_conf_content)
-    print(f"Configuration file '{www_conf_file}' created.")
-except Exception as e:
-    print(f"Failed to write configuration file '{www_conf_file}': {e}")
+with open('/etc/php/{php_version}/fpm/pool.d/www.conf', 'w') as file:
+    file.write(www_conf_content)
+print("Configuration file '/etc/php/{php_version}/fpm/pool.d/www.conf' created.")
 
 # default.conf 설정 추가
 nginx_conf_default_content = """
