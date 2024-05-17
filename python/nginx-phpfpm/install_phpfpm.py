@@ -38,11 +38,14 @@ php_packages = [f"php{php_version}-fpm", f"php{php_version}-cli", f"php{php_vers
 install_packages(php_packages)
 
 # PHP 관련 패키지 설치
-php_required_packages = [f"php-pear", f"php{php_version}-gd", f"php{php_version}-xml", f"php{php_version}-curl", f"php{php_version}-igbinary"]
+php_required_packages = [
+    f"php-pear", f"php{php_version}-gd", f"php{php_version}-xml", f"php{php_version}-curl",
+    f"php{php_version}-igbinary", f"php{php_version}-zip"
+]
 install_packages(php_required_packages)
 
 # PHP 모듈 설치
-php_modules_packages = [f"php{php_version}-redis", f"php{php_version}-mongodb", f"php{php_version}-zip", f"php{php_version}-imagick"]
+php_modules_packages = [f"php{php_version}-redis", f"php{php_version}-mongodb", f"php{php_version}-imagick"]
 install_packages(php_modules_packages)
 
 # librdkafka-dev 및 rdkafka 설치 및 활성화
