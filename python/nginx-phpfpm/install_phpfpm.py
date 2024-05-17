@@ -105,7 +105,7 @@ php_admin_value[error_log] = /var/log/php-fpm/www-error.log
 php_admin_flag[log_errors] = on
 """
 with open(f'/etc/php/{php_version}/fpm/pool.d/www.conf', 'w') as file:
-file.write(www_conf_content)
+    file.write(www_conf_content)
 print(f"Configuration file '/etc/php/{php_version}/fpm/pool.d/www.conf' created.")
 
 # default.conf 설정 추가
