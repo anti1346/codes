@@ -2,18 +2,26 @@ import os
 import subprocess
 import datetime
 
-def run_command(command):
+php_version = "8.1"
+
+def run_command(command, check=True):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    if result.returncode != 0:
+    if check and result.returncode != 0:
         print(f"Command failed: {command}")
         print(result.stderr)
         exit(1)
-    else:
-        print(result.stdout)
+    return result.stdout.strip()
 
 def install_packages(packages):
     for package in packages:
         run_command(f"sudo apt-get install -y {package}")
+
+def create_backup(file_path):
+    if os.path.exists(file_path):
+        now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        backup_path = f"{file_path}_{now}"
+        run_command(f"sudo cp {file_path} {backup_path}")
+        print(f"Backup created for {file_path} at {backup_path}")
 
 # Step 1: Install Nginx
 def install_nginx():
@@ -22,18 +30,21 @@ def install_nginx():
     required_packages = ["curl", "gnupg2", "ca-certificates", "lsb-release", "ubuntu-keyring", "apt-transport-https"]
     install_packages(required_packages)
     run_command("curl -s https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null")
+    
     lsb_release = subprocess.run("lsb_release -cs", shell=True, capture_output=True, text=True).stdout.strip()
     nginx_repo_command = f'echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu {lsb_release} nginx" | sudo tee /etc/apt/sources.list.d/nginx.list'
     run_command(nginx_repo_command)
+    
     run_command("sudo apt-get update")
     install_packages(["nginx"])
     
-    print("Configuring Nginx Backup...")
-    now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    run_command(f"sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf_{now}")
-    run_command(f"sudo cp /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf_{now}")
+    print("Configuring Nginx backup...")
+    create_backup("/etc/nginx/nginx.conf")
+    create_backup("/etc/nginx/conf.d/default.conf")
 
     print("Configuring Nginx user...")
+    # NGINX nginx.conf 설정 추가
+    #############################################################################
     nginx_conf_content = """
 user www-data www-data;
 worker_processes auto;
@@ -74,8 +85,6 @@ http {
 # Step 2: Install PHP-FPM
 def install_php_fpm():
     print("Installing PHP-FPM...")
-    php_version = "8.1"
-    
     required_packages = ["zlib1g-dev", "software-properties-common"]
     install_packages(required_packages)
 
@@ -91,13 +100,12 @@ def install_php_fpm():
     ]
     install_packages(php_required_packages)
 
-    now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    run_command(f"sudo cp /etc/php/{php_version}/fpm/php-fpm.conf /etc/php/{php_version}/fpm/php-fpm.conf_{now}")
-    run_command(f"sudo cp /etc/php/{php_version}/fpm/pool.d/www.conf /etc/php/{php_version}/fpm/pool.d/www.conf_{now}")
+    create_backup(f"/etc/php/{php_version}/fpm/php-fpm.conf")
+    create_backup(f"/etc/php/{php_version}/fpm/pool.d/www.conf")
 
     os.makedirs('/var/log/php-fpm', exist_ok=True)
 
-    run_command(f"sudo ln -s /etc/php/{php_version} /etc/php/php-fpm")
+    run_command(f"sudo ln -s /etc/php/{php_version} /etc/php/php-fpm", check=False)
 
     # PHP-FPM php-fpm.conf 설정 추가
     #############################################################################
@@ -164,16 +172,15 @@ php_admin_flag[log_errors] = on
 
 # Step 3: Install Laravel with Composer
 def install_laravel_with_composer():
-    php_version = "8.1"
-    
     print("Installing Laravel with Composer...")
     run_command(f"sudo apt-get install -y php{php_version}-intl php{php_version}-mbstring")
-    run_command("sudo apt-get update")
     run_command(f"sudo systemctl restart php{php_version}-fpm")
 
     run_command("sudo apt-get install -y composer")
     run_command("composer global require laravel/installer")
 
+    # NGINX default.conf 설정 추가
+    #############################################################################
     nginx_conf_default_content = """
 server {
     listen 80;
@@ -203,7 +210,7 @@ server {
         stub_status;
         access_log off;
         allow 127.0.0.1;
-        allow 192.168.56.0/24;
+        allow 0.0.0.0/0;
         deny all;
     }
 
@@ -213,9 +220,10 @@ server {
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_index index.php;
         include fastcgi_params;
-        allow 127.0.0.1;
-        deny all;
         access_log off;
+        allow 127.0.0.1;
+        allow 0.0.0.0/0;
+        deny all;
     }
 
     location ~ /\.ht {
@@ -229,10 +237,14 @@ server {
 
     laravel_project_path = "/usr/share/nginx/html"
     laravel_project_name = "laravel_project"
+    laravel_full_path = os.path.join(laravel_project_path, laravel_project_name)
+    if os.path.exists(laravel_full_path):
+        run_command(f"sudo rm -rf {laravel_full_path}")
+
     laravel_create_command = f"cd {laravel_project_path} && composer create-project --prefer-dist laravel/laravel {laravel_project_name}"
     run_command(laravel_create_command)
 
-    laravel_chmod_command = f"sudo chown -R www-data:www-data {laravel_project_path}/{laravel_project_name}"
+    laravel_chmod_command = f"sudo chown -R www-data:www-data {laravel_full_path}"
     run_command(laravel_chmod_command)
 
     run_command("sudo systemctl restart nginx")
