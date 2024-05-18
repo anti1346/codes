@@ -48,7 +48,7 @@ def install_nginx():
 
     print("Configuring Nginx user...")
     # NGINX nginx.conf 설정 추가
-    #############################################################################
+    ####################################################################################
     nginx_conf_content = """
 user www-data www-data;
 worker_processes auto;
@@ -112,7 +112,7 @@ def install_php_fpm():
     run_command(f"sudo ln -s /etc/php/{php_version} /etc/php/php-fpm", check=False)
 
     # PHP-FPM php-fpm.conf 설정 추가
-    #############################################################################
+    ####################################################################################
     php_fpm_conf_content = """
 include = /etc/php/php-fpm/fpm/pool.d/*.conf
 
@@ -126,7 +126,7 @@ daemonize = yes
     print(f"Configuration file '/etc/php/php-fpm/fpm/php-fpm.conf' created.")
 
     # PHP-FPM www.conf 설정 추가
-    #############################################################################
+    ####################################################################################
     www_conf_content = """
 [www]
 ; 사용자와 그룹 설정
@@ -216,7 +216,7 @@ def install_laravel_with_composer():
     run_command("composer global require laravel/installer")
 
     # NGINX default.conf 설정 추가
-    #############################################################################
+    ####################################################################################
     nginx_conf_default_content = """
 server {
     listen 80;

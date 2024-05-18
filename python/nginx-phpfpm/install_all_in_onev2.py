@@ -66,7 +66,7 @@ def install_nginx():
 
     print("Configuring Nginx user...")
     # NGINX nginx.conf 설정 추가
-    #############################################################################
+    ####################################################################################
     download_config(nginx_conf_url, '/etc/nginx/nginx.conf')
     
     run_command("sudo systemctl restart nginx")
@@ -98,11 +98,11 @@ def install_php_fpm():
     run_command(f"sudo ln -s /etc/php/{php_version} /etc/php/php-fpm", check=False)
 
     # PHP-FPM php-fpm.conf 설정 추가
-    #############################################################################
+    ####################################################################################
     download_config(php_fpm_conf_url, f'/etc/php/{php_version}/fpm/php-fpm.conf')
 
     # PHP-FPM www.conf 설정 추가
-    #############################################################################
+    ####################################################################################
     download_config(php_fpm_www_conf_url, f'/etc/php/{php_version}/fpm/pool.d/www.conf')
     
     run_command(f"sudo sed -i 's/expose_php = On/expose_php = Off/g' /etc/php/{php_version}/cli/php.ini")
@@ -153,7 +153,7 @@ def install_laravel_with_composer():
     run_command("composer global require laravel/installer")
 
     # NGINX default.conf 설정 추가
-    #############################################################################
+    ####################################################################################
     download_config(nginx_default_conf_url, '/etc/nginx/conf.d/default.conf')
     
     laravel_project_path = "/usr/share/nginx/html"
