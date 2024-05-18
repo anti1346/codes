@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import subprocess
 
 # PHP 버전 변수 정의

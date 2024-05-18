@@ -18,8 +18,17 @@ def install_packages(packages):
 # Step 1: Install Nginx
 def install_nginx():
     print("Installing Nginx...")
+    run_command("sudo apt-get update")
+    required_packages = ["curl", "gnupg2", "ca-certificates", "lsb-release", "ubuntu-keyring", "apt-transport-https"]
+    install_packages(required_packages)
+    run_command("curl -s https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null")
+    lsb_release = subprocess.run("lsb_release -cs", shell=True, capture_output=True, text=True).stdout.strip()
+    nginx_repo_command = f'echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu {lsb_release} nginx" | sudo tee /etc/apt/sources.list.d/nginx.list'
+    run_command(nginx_repo_command)
+    run_command("sudo apt-get update")
     install_packages(["nginx"])
     
+    print("Configuring Nginx Backup...")
     now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     run_command(f"sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf_{now}")
     run_command(f"sudo cp /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf_{now}")
