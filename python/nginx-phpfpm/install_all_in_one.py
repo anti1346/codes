@@ -16,6 +16,10 @@ def install_packages(packages):
     for package in packages:
         run_command(f"sudo apt-get install -y {package}")
 
+def remove_packages(packages):
+    for package in packages:
+        run_command(f"sudo apt-get remove -y {package}")
+
 def create_backup(file_path):
     if os.path.exists(file_path):
         now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -100,11 +104,11 @@ def install_php_fpm():
     ]
     install_packages(php_required_packages)
 
+    print("Configuring PHP-FPM backup...")
     create_backup(f"/etc/php/{php_version}/fpm/php-fpm.conf")
     create_backup(f"/etc/php/{php_version}/fpm/pool.d/www.conf")
 
     os.makedirs('/var/log/php-fpm', exist_ok=True)
-
     run_command(f"sudo ln -s /etc/php/{php_version} /etc/php/php-fpm", check=False)
 
     # PHP-FPM php-fpm.conf 설정 추가
@@ -170,7 +174,13 @@ php_admin_flag[log_errors] = on
 
     print("PHP-FPM installed and configured.")
 
-# Step 3: Install Laravel with Composer
+# Step 3: Remove PHP-FPM
+def remove_php_fpm():
+    required_packages = ["php8.3-common", "php8.3-xml"]
+    remove_packages(required_packages)
+    run_command("sudo dpkg --purge $(dpkg -l | awk '/^rc/ { print $2 }')")
+
+# Step 4: Install Laravel with Composer
 def install_laravel_with_composer():
     print("Installing Laravel with Composer...")
     run_command(f"sudo apt-get install -y php{php_version}-intl php{php_version}-mbstring")
@@ -254,6 +264,7 @@ server {
 def main():
     install_nginx()
     install_php_fpm()
+    remove_php_fpm()
     install_laravel_with_composer()
     print("All installations and configurations are completed.")
 
