@@ -3,7 +3,13 @@ import subprocess
 import datetime
 import requests
 
-php_version = "8.1"
+PHP_VERSION = "8.1"
+GITHUB_CONTENT = "https://raw.githubusercontent.com/anti1346"
+GITHUB_REPOSITORY = "codes/main/python/nginx-phpfpm/conf"
+NGINX_CONF_URL = f"{GITHUB_CONTENT}/{GITHUB_REPOSITORY}/nginx.conf"
+NGINX_DEFAULT_CONF_URL = f"{GITHUB_CONTENT}/{GITHUB_REPOSITORY}/default.conf"
+PHP_FPM_CONF_URL = f"{GITHUB_CONTENT}/{GITHUB_REPOSITORY}/php-fpm.conf"
+PHP_FPM_WWW_CONF_URL = f"{GITHUB_CONTENT}/{GITHUB_REPOSITORY}/www.conf"
 
 def run_command(command, check=True):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
@@ -15,11 +21,17 @@ def run_command(command, check=True):
 
 def install_packages(packages):
     for package in packages:
-        run_command(f"sudo apt-get install -y {package}")
+        try:
+            run_command(f"sudo apt-get install -y {package}")
+        except subprocess.CalledProcessError as e:
+            print(f"Error installing package {package}: {e}")
 
 def remove_packages(packages):
     for package in packages:
-        run_command(f"sudo apt-get remove -y {package}")
+        try:
+            run_command(f"sudo apt-get remove -y {package}")
+        except subprocess.CalledProcessError as e:
+            print(f"Error removing package {package}: {e}")
 
 def create_backup(file_path):
     if os.path.exists(file_path):
@@ -27,13 +39,6 @@ def create_backup(file_path):
         backup_path = f"{file_path}_{now}"
         run_command(f"sudo cp {file_path} {backup_path}")
         print(f"Backup created for {file_path} at {backup_path}")
-
-github_content = "https://raw.githubusercontent.com/anti1346"
-github_repository = "codes/main/python/nginx-phpfpm/conf"
-nginx_conf_url = f"{github_content}/{github_repository}/nginx.conf"
-nginx_default_conf_url = f"{github_content}/{github_repository}/default.conf"
-php_fpm_conf_url = f"{github_content}/{github_repository}/php-fpm.conf"
-php_fpm_www_conf_url = f"{github_content}/{github_repository}/www.conf"
 
 def download_config(url, save_path):
     response = requests.get(url)
@@ -67,7 +72,7 @@ def install_nginx():
     print("Configuring Nginx user...")
     # NGINX nginx.conf 설정 추가
     ####################################################################################
-    download_config(nginx_conf_url, '/etc/nginx/nginx.conf')
+    download_config(NGINX_CONF_URL, '/etc/nginx/nginx.conf')
     
     run_command("sudo systemctl restart nginx")
     print("Nginx installed and configured.")
@@ -81,40 +86,40 @@ def install_php_fpm():
     run_command("sudo add-apt-repository -y ppa:ondrej/php")
     run_command("sudo apt-get update")
 
-    php_packages = [f"php{php_version}-fpm", f"php{php_version}-cli", f"php{php_version}-common", f"php{php_version}-dev"]
+    php_packages = [f"php{PHP_VERSION}-fpm", f"php{PHP_VERSION}-cli", f"php{PHP_VERSION}-common", f"php{PHP_VERSION}-dev"]
     install_packages(php_packages)
 
     php_required_packages = [
-        "php-pear", f"php{php_version}-gd", f"php{php_version}-xml", f"php{php_version}-curl",
-        f"php{php_version}-igbinary", f"php{php_version}-zip"
+        "php-pear", f"php{PHP_VERSION}-gd", f"php{PHP_VERSION}-xml", f"php{PHP_VERSION}-curl",
+        f"php{PHP_VERSION}-igbinary", f"php{PHP_VERSION}-zip"
     ]
     install_packages(php_required_packages)
 
     print("Configuring PHP-FPM backup...")
-    create_backup(f"/etc/php/{php_version}/fpm/php-fpm.conf")
-    create_backup(f"/etc/php/{php_version}/fpm/pool.d/www.conf")
+    create_backup(f"/etc/php/{PHP_VERSION}/fpm/php-fpm.conf")
+    create_backup(f"/etc/php/{PHP_VERSION}/fpm/pool.d/www.conf")
 
     os.makedirs('/var/log/php-fpm', exist_ok=True)
-    run_command(f"sudo ln -s /etc/php/{php_version} /etc/php/php-fpm", check=False)
+    run_command(f"sudo ln -s /etc/php/{PHP_VERSION} /etc/php/php-fpm", check=False)
 
     # PHP-FPM php-fpm.conf 설정 추가
     ####################################################################################
-    download_config(php_fpm_conf_url, f'/etc/php/{php_version}/fpm/php-fpm.conf')
+    download_config(PHP_FPM_CONF_URL, f'/etc/php/{PHP_VERSION}/fpm/php-fpm.conf')
 
     # PHP-FPM www.conf 설정 추가
     ####################################################################################
-    download_config(php_fpm_www_conf_url, f'/etc/php/{php_version}/fpm/pool.d/www.conf')
+    download_config(PHP_FPM_WWW_CONF_URL, f'/etc/php/{PHP_VERSION}/fpm/pool.d/www.conf')
     
-    run_command(f"sudo sed -i 's/expose_php = On/expose_php = Off/g' /etc/php/{php_version}/cli/php.ini")
+    run_command(f"sudo sed -i 's/expose_php = On/expose_php = Off/g' /etc/php/{PHP_VERSION}/cli/php.ini")
     
-    run_command(f"sudo systemctl restart php{php_version}-fpm")
+    run_command(f"sudo systemctl restart php{PHP_VERSION}-fpm")
 
     print("PHP-FPM installed and configured.")
 
 # Step 3: Install PHP-FPM Modules
 def install_php_modules():
     print("Installing PHP-FPM modules...")
-    php_modules_packages = [f"php{php_version}-redis", f"php{php_version}-mongodb", f"php{php_version}-imagick"]
+    php_modules_packages = [f"php{PHP_VERSION}-redis", f"php{PHP_VERSION}-mongodb", f"php{PHP_VERSION}-imagick"]
     install_packages(php_modules_packages)
 
     # librdkafka-dev 및 rdkafka 설치 및 활성화
@@ -123,9 +128,9 @@ def install_php_modules():
         # Install librdkafka-dev and rdkafka
         run_command("sudo apt-get install -y librdkafka-dev")
         run_command("sudo pecl install rdkafka")
-        run_command(f'echo "extension=rdkafka.so" | sudo tee /etc/php/{php_version}/mods-available/rdkafka.ini')
-        run_command(f"sudo ln -s /etc/php/{php_version}/mods-available/rdkafka.ini /etc/php/{php_version}/fpm/conf.d/20-rdkafka.ini")
-        run_command(f"sudo ln -s /etc/php/{php_version}/mods-available/rdkafka.ini /etc/php/{php_version}/cli/conf.d/20-rdkafka.ini")
+        run_command(f'echo "extension=rdkafka.so" | sudo tee /etc/php/{PHP_VERSION}/mods-available/rdkafka.ini')
+        run_command(f"sudo ln -s /etc/php/{PHP_VERSION}/mods-available/rdkafka.ini /etc/php/{PHP_VERSION}/fpm/conf.d/20-rdkafka.ini")
+        run_command(f"sudo ln -s /etc/php/{PHP_VERSION}/mods-available/rdkafka.ini /etc/php/{PHP_VERSION}/cli/conf.d/20-rdkafka.ini")
         print("PHP-FPM modules installed.")
     else:
         print("rdkafka PHP module is already installed.")
@@ -146,15 +151,15 @@ def remove_php_fpm():
 # Step 5: Install Laravel with Composer
 def install_laravel_with_composer():
     print("Installing Laravel with Composer...")
-    run_command(f"sudo apt-get install -y php{php_version}-intl php{php_version}-mbstring")
-    run_command(f"sudo systemctl restart php{php_version}-fpm")
+    run_command(f"sudo apt-get install -y php{PHP_VERSION}-intl php{PHP_VERSION}-mbstring")
+    run_command(f"sudo systemctl restart php{PHP_VERSION}-fpm")
 
     run_command("sudo apt-get install -y composer")
     run_command("composer global require laravel/installer")
 
     # NGINX default.conf 설정 추가
     ####################################################################################
-    download_config(nginx_default_conf_url, '/etc/nginx/conf.d/default.conf')
+    download_config(NGINX_DEFAULT_CONF_URL, '/etc/nginx/conf.d/default.conf')
     
     laravel_project_path = "/usr/share/nginx/html"
     laravel_project_name = "laravel_project"
