@@ -130,7 +130,6 @@ def install_php_modules():
     else:
         print("rdkafka PHP module is already installed.")
 
-
 # Step 4: Remove PHP-FPM
 def remove_php_fpm():
     print("Removing PHP-FPM 8.3 packages...")

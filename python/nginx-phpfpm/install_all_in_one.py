@@ -181,12 +181,17 @@ def install_php_modules():
     install_packages(php_modules_packages)
 
     # librdkafka-dev 및 rdkafka 설치 및 활성화
-    run_command("sudo apt-get install -y librdkafka-dev")
-    run_command("sudo pecl install rdkafka")
-    run_command(f'echo "extension=rdkafka.so" | sudo tee /etc/php/{php_version}/mods-available/rdkafka.ini')
-    run_command(f"sudo ln -s /etc/php/{php_version}/mods-available/rdkafka.ini /etc/php/{php_version}/fpm/conf.d/20-rdkafka.ini")
-    run_command(f"sudo ln -s /etc/php/{php_version}/mods-available/rdkafka.ini /etc/php/{php_version}/cli/conf.d/20-rdkafka.ini")
-    print("PHP-FPM modules installed.")
+    rdkafka_installed = "rdkafka" in subprocess.run("php -m", shell=True, capture_output=True, text=True).stdout
+    if not rdkafka_installed:
+        # Install librdkafka-dev and rdkafka
+        run_command("sudo apt-get install -y librdkafka-dev")
+        run_command("sudo pecl install rdkafka")
+        run_command(f'echo "extension=rdkafka.so" | sudo tee /etc/php/{php_version}/mods-available/rdkafka.ini')
+        run_command(f"sudo ln -s /etc/php/{php_version}/mods-available/rdkafka.ini /etc/php/{php_version}/fpm/conf.d/20-rdkafka.ini")
+        run_command(f"sudo ln -s /etc/php/{php_version}/mods-available/rdkafka.ini /etc/php/{php_version}/cli/conf.d/20-rdkafka.ini")
+        print("PHP-FPM modules installed.")
+    else:
+        print("rdkafka PHP module is already installed.")
 
 # Step 4: Remove PHP-FPM
 def remove_php_fpm():
@@ -285,7 +290,7 @@ server {
 def main():
     install_nginx()
     install_php_fpm()
-    # install_php_modules()
+    install_php_modules()
     remove_php_fpm()
     install_laravel_with_composer()
     print("All installations and configurations are completed.")
