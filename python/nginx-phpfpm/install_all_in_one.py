@@ -158,16 +158,16 @@ php_admin_flag[log_errors] = on
     
     run_command(f"sudo sed -i 's/expose_php = On/expose_php = Off/g' /etc/php/{php_version}/cli/php.ini")
     
-    run_command("sudo systemctl restart php{php_version}-fpm")
+    run_command(f"sudo systemctl restart php{php_version}-fpm")
 
     print("PHP-FPM installed and configured.")
 
 # Step 3: Install Laravel with Composer
 def install_laravel_with_composer():
     print("Installing Laravel with Composer...")
-    run_command("sudo apt-get install -y php{php_version}-intl php{php_version}-mbstring")
+    run_command(f"sudo apt-get install -y php{php_version}-intl php{php_version}-mbstring")
     run_command("sudo apt-get update")
-    run_command("sudo systemctl restart php{php_version}-fpm")
+    run_command(f"sudo systemctl restart php{php_version}-fpm")
 
     run_command("sudo apt-get install -y composer")
     run_command("composer global require laravel/installer")
