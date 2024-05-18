@@ -174,13 +174,30 @@ php_admin_flag[log_errors] = on
 
     print("PHP-FPM installed and configured.")
 
-# Step 3: Remove PHP-FPM
+# Step 3: Install PHP-FPM Modules
+def install_php_modules():
+    print("Installing PHP-FPM modules...")
+    php_modules_packages = [f"php{php_version}-redis", f"php{php_version}-mongodb", f"php{php_version}-imagick"]
+    install_packages(php_modules_packages)
+
+    # librdkafka-dev 및 rdkafka 설치 및 활성화
+    run_command("sudo apt-get install -y librdkafka-dev")
+    run_command("sudo pecl install rdkafka")
+    run_command(f'echo "extension=rdkafka.so" | sudo tee /etc/php/{php_version}/mods-available/rdkafka.ini')
+    run_command(f"sudo ln -s /etc/php/{php_version}/mods-available/rdkafka.ini /etc/php/{php_version}/fpm/conf.d/20-rdkafka.ini")
+    run_command(f"sudo ln -s /etc/php/{php_version}/mods-available/rdkafka.ini /etc/php/{php_version}/cli/conf.d/20-rdkafka.ini")
+    print("PHP-FPM modules installed.")
+
+# Step 4: Remove PHP-FPM
 def remove_php_fpm():
+    print("Removing PHP-FPM 8.3 packages...")
     required_packages = ["php8.3-common", "php8.3-xml"]
     remove_packages(required_packages)
+    
     run_command("sudo dpkg --purge $(dpkg -l | awk '/^rc/ { print $2 }')")
+    print("PHP-FPM 8.3 removal complete.")
 
-# Step 4: Install Laravel with Composer
+# Step 5: Install Laravel with Composer
 def install_laravel_with_composer():
     print("Installing Laravel with Composer...")
     run_command(f"sudo apt-get install -y php{php_version}-intl php{php_version}-mbstring")
@@ -264,6 +281,7 @@ server {
 def main():
     install_nginx()
     install_php_fpm()
+    #install_php_modules()
     remove_php_fpm()
     install_laravel_with_composer()
     print("All installations and configurations are completed.")
