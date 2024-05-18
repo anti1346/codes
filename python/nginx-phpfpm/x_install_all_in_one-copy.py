@@ -210,7 +210,7 @@ server {
         stub_status;
         access_log off;
         allow 127.0.0.1;
-        allow 192.168.56.0/24;
+        allow 0.0.0.0/0;
         deny all;
     }
 
@@ -220,9 +220,10 @@ server {
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_index index.php;
         include fastcgi_params;
-        allow 127.0.0.1;
-        deny all;
         access_log off;
+        allow 127.0.0.1;
+        allow 0.0.0.0/0;
+        deny all;
     }
 
     location ~ /\.ht {
