@@ -237,10 +237,14 @@ server {
 
     laravel_project_path = "/usr/share/nginx/html"
     laravel_project_name = "laravel_project"
+    laravel_full_path = os.path.join(laravel_project_path, laravel_project_name)
+    if os.path.exists(laravel_full_path):
+        run_command(f"sudo rm -rf {laravel_full_path}")
+
     laravel_create_command = f"cd {laravel_project_path} && composer create-project --prefer-dist laravel/laravel {laravel_project_name}"
     run_command(laravel_create_command)
 
-    laravel_chmod_command = f"sudo chown -R www-data:www-data {laravel_project_path}/{laravel_project_name}"
+    laravel_chmod_command = f"sudo chown -R www-data:www-data {laravel_full_path}"
     run_command(laravel_chmod_command)
 
     run_command("sudo systemctl restart nginx")
