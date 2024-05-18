@@ -1,6 +1,5 @@
 import os
 import subprocess
-import datetime
 
 def run_command(command):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
@@ -19,42 +18,12 @@ def install_packages(packages):
 def install_nginx():
     print("Installing Nginx...")
     install_packages(["nginx"])
-    
-    now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    run_command(f"sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf_{now}")
-    run_command(f"sudo cp /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf_{now}")
-
     print("Configuring Nginx user...")
     nginx_conf_content = """
     user www-data www-data;
     worker_processes auto;
 
     pid /var/run/nginx.pid;
-
-    events {
-        worker_connections 1024;
-    }
-
-    http {
-        include /etc/nginx/mime.types;
-        default_type application/octet-stream;
-
-        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                        '$status $body_bytes_sent "$http_referer" '
-                        '"$http_user_agent" "$http_x_forwarded_for"';
-
-        access_log /var/log/nginx/access.log main;
-        error_log /var/log/nginx/error.log;
-
-        server_tokens off;
-
-        sendfile on;
-        keepalive_timeout 65;
-        
-        gzip on;
-
-        include /etc/nginx/conf.d/*.conf;
-    }
     """
     with open('/etc/nginx/nginx.conf', 'w') as file:
         file.write(nginx_conf_content)
@@ -65,7 +34,6 @@ def install_nginx():
 def install_php_fpm():
     print("Installing PHP-FPM...")
     php_version = "8.1"
-    
     required_packages = ["zlib1g-dev", "software-properties-common"]
     install_packages(required_packages)
 
@@ -80,14 +48,6 @@ def install_php_fpm():
         f"php{php_version}-igbinary", f"php{php_version}-zip"
     ]
     install_packages(php_required_packages)
-
-    now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    run_command(f"sudo cp /etc/php/{php_version}/fpm/php-fpm.conf /etc/php/{php_version}/fpm/php-fpm.conf_{now}")
-    run_command(f"sudo cp /etc/php/{php_version}/fpm/pool.d/www.conf /etc/php/{php_version}/fpm/pool.d/www.conf_{now}")
-
-    os.makedirs('/var/log/php-fpm', exist_ok=True)
-
-    run_command(f"sudo ln -s /etc/php/{php_version} /etc/php/php-fpm")
 
     # PHP-FPM php-fpm.conf 설정 추가
     #############################################################################
@@ -110,54 +70,19 @@ def install_php_fpm():
     ; 사용자와 그룹 설정
     user = www-data
     group = www-data
-
-    ; 소켓과 권한 설정
-    listen = /run/php/php-fpm.sock
-    listen.owner = www-data
-    listen.group = www-data
-    listen.mode = 0666
-    ;listen.allowed_clients = 127.0.0.1
-
-    ; 프로세스 관리 설정
-    pm = dynamic
-    pm.max_children = 5
-    pm.start_servers = 2
-    pm.min_spare_servers = 1
-    pm.max_spare_servers = 3
-
-    ; Health check 경로 설정
-    ping.path = /ping
-    pm.status_path = /status
-
-    ; 요청 종료 및 슬로우 로그 설정
-    request_terminate_timeout = 30
-    request_slowlog_timeout = 10
-    slowlog = /var/log/php-fpm/www-slow.log
-
-    ; 액세스 로그 설정
-    access.log = /var/log/php-fpm/www-access.log
-    access.format = "[%t] %m %{REQUEST_SCHEME}e://%{HTTP_HOST}e%{REQUEST_URI}e %f pid:%p TIME:%ds MEM:%{mega}Mmb CPU:%C%% status:%s {%{REMOTE_ADDR}e|%{HTTP_USER_AGENT}e}"
-
-    ; 에러 로그 및 로그 기록 활성화 설정
-    php_admin_value[error_log] = /var/log/php-fpm/www-error.log
-    php_admin_flag[log_errors] = on
     """
     with open('/etc/php/php-fpm/fpm/pool.d/www.conf', 'w') as file:
         file.write(www_conf_content)
     print("Configuration file '/etc/php/php-fpm/fpm/pool.d/www.conf' created.")
-    
-    run_command(f"sudo sed -i 's/expose_php = On/expose_php = Off/g' /etc/php/{php_version}/cli/php.ini")
-    
-    run_command("sudo systemctl restart php{php_version}-fpm")
 
     print("PHP-FPM installed and configured.")
 
 # Step 3: Install Laravel with Composer
 def install_laravel_with_composer():
     print("Installing Laravel with Composer...")
-    run_command("sudo apt-get install -y php{php_version}-intl php{php_version}-mbstring")
+    run_command("sudo apt-get install -y php-intl")
     run_command("sudo apt-get update")
-    run_command("sudo systemctl restart php{php_version}-fpm")
+    run_command("sudo systemctl restart php8.1-fpm")
 
     run_command("sudo apt-get install -y composer")
     run_command("composer global require laravel/installer")
@@ -169,48 +94,6 @@ def install_laravel_with_composer():
         # root /usr/share/nginx/html;
         root /usr/share/nginx/html/laravel_project/public;
         index index.php index.html;
-        
-        access_log /var/log/nginx/default-access.log main;
-        error_log /var/log/nginx/default-error.log;
-
-        location / {
-            try_files $uri $uri/ /index.php?$query_string;
-        }
-        
-        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
-        location ~ \.php$ {
-            try_files $uri =404;
-            fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-            fastcgi_pass unix:/run/php/php-fpm.sock;
-            fastcgi_index index.php;
-            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-            include fastcgi_params;
-        }
-
-        # nginx status
-        location /nginx_status {
-            stub_status;
-            access_log off;
-            allow 127.0.0.1;
-            allow 192.168.56.0/24;
-            deny all;
-        }
-
-        # php-fpm status
-        location ~ ^/(status|ping)$ {
-            fastcgi_pass unix:/run/php/php-fpm.sock;
-            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-            fastcgi_index index.php;
-            include fastcgi_params;
-            allow 127.0.0.1;
-            deny all;
-            access_log off;
-        }
-        
-        location ~ /\.ht {
-            deny  all;
-        }
-    }
     """
     with open('/etc/nginx/conf.d/default.conf', 'w') as file:
         file.write(nginx_conf_default_content)
