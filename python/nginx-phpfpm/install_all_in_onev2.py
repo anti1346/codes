@@ -119,7 +119,7 @@ def install_php_modules():
 
     # librdkafka-dev 및 rdkafka 설치 및 활성화
     rdkafka_installed = "rdkafka" in subprocess.run("php -m", shell=True, capture_output=True, text=True).stdout
-        if not rdkafka_installed:
+    if not rdkafka_installed:
         # Install librdkafka-dev and rdkafka
         run_command("sudo apt-get install -y librdkafka-dev")
         run_command("sudo pecl install rdkafka", check=False)
