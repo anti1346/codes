@@ -193,8 +193,7 @@ def remove_php_fpm():
     print("Removing PHP-FPM 8.3 packages...")
     required_packages = ["php8.3-common", "php8.3-xml"]
     remove_packages(required_packages)
-    
-    # run_command("sudo dpkg --purge $(dpkg -l | awk '/^rc/ { print $2 }')")
+
     purge_list = run_command("dpkg -l | awk '/^rc/ { print $2 }'", check=False)
     if purge_list:
         run_command(f"sudo dpkg --purge {purge_list}")
@@ -286,7 +285,7 @@ server {
 def main():
     install_nginx()
     install_php_fpm()
-    #install_php_modules()
+    install_php_modules()
     remove_php_fpm()
     install_laravel_with_composer()
     print("All installations and configurations are completed.")
