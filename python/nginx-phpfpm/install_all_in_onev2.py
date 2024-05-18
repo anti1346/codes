@@ -122,7 +122,7 @@ def install_php_modules():
     if not rdkafka_installed:
         # Install librdkafka-dev and rdkafka
         run_command("sudo apt-get install -y librdkafka-dev")
-        run_command("sudo pecl install rdkafka", check=False)
+        run_command("sudo pecl install rdkafka")
         run_command(f'echo "extension=rdkafka.so" | sudo tee /etc/php/{php_version}/mods-available/rdkafka.ini')
         run_command(f"sudo ln -s /etc/php/{php_version}/mods-available/rdkafka.ini /etc/php/{php_version}/fpm/conf.d/20-rdkafka.ini")
         run_command(f"sudo ln -s /etc/php/{php_version}/mods-available/rdkafka.ini /etc/php/{php_version}/cli/conf.d/20-rdkafka.ini")
