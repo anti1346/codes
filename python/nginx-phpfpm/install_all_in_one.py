@@ -164,6 +164,8 @@ php_admin_flag[log_errors] = on
 
 # Step 3: Install Laravel with Composer
 def install_laravel_with_composer():
+    php_version = "8.1"
+    
     print("Installing Laravel with Composer...")
     run_command(f"sudo apt-get install -y php{php_version}-intl php{php_version}-mbstring")
     run_command("sudo apt-get update")
