@@ -285,7 +285,7 @@ server {
 def main():
     install_nginx()
     install_php_fpm()
-    install_php_modules()
+    # install_php_modules()
     remove_php_fpm()
     install_laravel_with_composer()
     print("All installations and configurations are completed.")

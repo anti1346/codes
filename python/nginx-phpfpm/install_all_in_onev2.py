@@ -1,6 +1,7 @@
 import os
 import subprocess
 import datetime
+import requests
 
 php_version = "8.1"
 
@@ -27,6 +28,23 @@ def create_backup(file_path):
         run_command(f"sudo cp {file_path} {backup_path}")
         print(f"Backup created for {file_path} at {backup_path}")
 
+github_content = "https://raw.githubusercontent.com/anti1346"
+github_repository = "codes/main/python/nginx-phpfpm/conf"
+nginx_conf_url = f"{github_content}/{github_repository}/nginx.conf"
+nginx_default_conf_url = f"{github_content}/{github_repository}/default.conf"
+php_fpm_conf_url = f"{github_content}/{github_repository}/php-fpm.conf"
+php_fpm_www_conf_url = f"{github_content}/{github_repository}/www.conf"
+
+def download_config(url, save_path):
+    response = requests.get(url)
+    if response.status_code == 200:
+        config_content = response.text
+        with open(save_path, 'w') as file:
+            file.write(config_content)
+        print(f"Configuration file downloaded and saved at {save_path}")
+    else:
+        print(f"Failed to download configuration file from {url}")
+
 # Step 1: Install Nginx
 def install_nginx():
     print("Installing Nginx...")
@@ -49,40 +67,8 @@ def install_nginx():
     print("Configuring Nginx user...")
     # NGINX nginx.conf 설정 추가
     #############################################################################
-    nginx_conf_content = """
-user www-data www-data;
-worker_processes auto;
-
-pid /var/run/nginx.pid;
-
-events {
-    worker_connections 1024;
-}
-
-http {
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
-
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                    '$status $body_bytes_sent "$http_referer" '
-                    '"$http_user_agent" "$http_x_forwarded_for"';
-
-    access_log /var/log/nginx/access.log main;
-    error_log /var/log/nginx/error.log;
-
-    server_tokens off;
-
-    sendfile on;
-
-    keepalive_timeout 65;
-
-    gzip on;
-
-    include /etc/nginx/conf.d/*.conf;
-}
-    """
-    with open('/etc/nginx/nginx.conf', 'w') as file:
-        file.write(nginx_conf_content)
+    download_config(nginx_conf_url, '/etc/nginx/nginx.conf')
+    
     run_command("sudo systemctl restart nginx")
     print("Nginx installed and configured.")
 
@@ -113,60 +99,11 @@ def install_php_fpm():
 
     # PHP-FPM php-fpm.conf 설정 추가
     #############################################################################
-    php_fpm_conf_content = """
-include = /etc/php/php-fpm/fpm/pool.d/*.conf
-
-[global]
-pid = /run/php/php-fpm.pid
-error_log = /var/log/php-fpm/php-fpm.log
-daemonize = yes
-    """
-    with open(f'/etc/php/php-fpm/fpm/php-fpm.conf', 'w') as file:
-        file.write(php_fpm_conf_content)
-    print(f"Configuration file '/etc/php/php-fpm/fpm/php-fpm.conf' created.")
+    download_config(php_fpm_conf_url, f'/etc/php/{php_version}/fpm/php-fpm.conf')
 
     # PHP-FPM www.conf 설정 추가
     #############################################################################
-    www_conf_content = """
-[www]
-; 사용자와 그룹 설정
-user = www-data
-group = www-data
-
-; 소켓과 권한 설정
-listen = /run/php/php-fpm.sock
-listen.owner = www-data
-listen.group = www-data
-listen.mode = 0666
-;listen.allowed_clients = 127.0.0.1
-
-; 프로세스 관리 설정
-pm = dynamic
-pm.max_children = 5
-pm.start_servers = 2
-pm.min_spare_servers = 1
-pm.max_spare_servers = 3
-
-; Health check 경로 설정
-ping.path = /ping
-pm.status_path = /status
-
-; 요청 종료 및 슬로우 로그 설정
-request_terminate_timeout = 30
-request_slowlog_timeout = 10
-slowlog = /var/log/php-fpm/www-slow.log
-
-; 액세스 로그 설정
-access.log = /var/log/php-fpm/www-access.log
-access.format = "[%t] %m %{REQUEST_SCHEME}e://%{HTTP_HOST}e%{REQUEST_URI}e %f pid:%p TIME:%ds MEM:%{mega}Mmb CPU:%C%% status:%s {%{REMOTE_ADDR}e|%{HTTP_USER_AGENT}e}"
-
-; 에러 로그 및 로그 기록 활성화 설정
-php_admin_value[error_log] = /var/log/php-fpm/www-error.log
-php_admin_flag[log_errors] = on
-    """
-    with open('/etc/php/php-fpm/fpm/pool.d/www.conf', 'w') as file:
-        file.write(www_conf_content)
-    print("Configuration file '/etc/php/php-fpm/fpm/pool.d/www.conf' created.")
+    download_config(php_fpm_www_conf_url, f'/etc/php/{php_version}/fpm/pool.d/www.conf')
     
     run_command(f"sudo sed -i 's/expose_php = On/expose_php = Off/g' /etc/php/{php_version}/cli/php.ini")
     
@@ -212,60 +149,8 @@ def install_laravel_with_composer():
 
     # NGINX default.conf 설정 추가
     #############################################################################
-    nginx_conf_default_content = """
-server {
-    listen 80;
-    server_name _;
-    root /usr/share/nginx/html/laravel_project/public;
-    index index.php index.html;
-
-    access_log /var/log/nginx/default-access.log main;
-    error_log /var/log/nginx/default-error.log;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
-    location ~ \.php$ {
-        try_files $uri =404;
-        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
-        fastcgi_pass unix:/run/php/php-fpm.sock;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    # nginx status
-    location /nginx_status {
-        stub_status;
-        access_log off;
-        allow 127.0.0.1;
-        allow 0.0.0.0/0;
-        deny all;
-    }
-
-    # php-fpm status
-    location ~ ^/(status|ping)$ {
-        fastcgi_pass unix:/run/php/php-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_index index.php;
-        include fastcgi_params;
-        access_log off;
-        allow 127.0.0.1;
-        allow 0.0.0.0/0;
-        deny all;
-    }
-
-    location ~ /\.ht {
-        deny  all;
-    }
-}
-    """
-    with open('/etc/nginx/conf.d/default.conf', 'w') as file:
-        file.write(nginx_conf_default_content)
-    print("Nginx configuration for Laravel created.")
-
+    download_config(nginx_default_conf_url, '/etc/nginx/conf.d/default.conf')
+    
     laravel_project_path = "/usr/share/nginx/html"
     laravel_project_name = "laravel_project"
     laravel_full_path = os.path.join(laravel_project_path, laravel_project_name)
