@@ -194,7 +194,12 @@ def remove_php_fpm():
     required_packages = ["php8.3-common", "php8.3-xml"]
     remove_packages(required_packages)
     
-    run_command("sudo dpkg --purge $(dpkg -l | awk '/^rc/ { print $2 }')")
+    # run_command("sudo dpkg --purge $(dpkg -l | awk '/^rc/ { print $2 }')")
+    purge_list = run_command("dpkg -l | awk '/^rc/ { print $2 }'", check=False)
+    if purge_list:
+        run_command(f"sudo dpkg --purge {purge_list}")
+    else:
+        print("No packages to purge.")
     print("PHP-FPM 8.3 removal complete.")
 
 # Step 5: Install Laravel with Composer
