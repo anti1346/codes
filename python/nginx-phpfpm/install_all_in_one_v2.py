@@ -56,8 +56,7 @@ def install_nginx():
     lsb_release = run_command("lsb_release -cs")
     nginx_repo_command = f'echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu {lsb_release} nginx" | sudo tee /etc/apt/sources.list.d/nginx.list'
     run_command(nginx_repo_command)
-    
-    run_command("sudo apt-get update")
+
     install_packages(["nginx"])
     
     print("Configuring Nginx backup...")
@@ -79,7 +78,6 @@ def install_php_fpm():
     install_packages(required_packages)
 
     run_command("sudo add-apt-repository -y ppa:ondrej/php")
-    run_command("sudo apt-get update")
 
     php_packages = [f"php{PHP_VERSION}-fpm", f"php{PHP_VERSION}-cli", f"php{PHP_VERSION}-common", f"php{PHP_VERSION}-dev"]
     install_packages(php_packages)
