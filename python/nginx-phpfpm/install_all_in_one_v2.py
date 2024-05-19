@@ -20,18 +20,14 @@ def run_command(command, check=True):
     return result.stdout.strip()
 
 def install_packages(packages):
+    run_command("sudo apt-get update")
     for package in packages:
-        try:
-            run_command(f"sudo apt-get install -y {package}")
-        except subprocess.CalledProcessError as e:
-            print(f"Error installing package {package}: {e}")
+        run_command(f"sudo apt-get install -y {package}")
 
 def remove_packages(packages):
+    run_command("sudo apt-get update")
     for package in packages:
-        try:
-            run_command(f"sudo apt-get remove -y {package}")
-        except subprocess.CalledProcessError as e:
-            print(f"Error removing package {package}: {e}")
+        run_command(f"sudo apt-get remove -y {package}")
 
 def create_backup(file_path):
     if os.path.exists(file_path):
@@ -53,12 +49,11 @@ def download_config(url, save_path):
 # Step 1: Install Nginx
 def install_nginx():
     print("Installing Nginx...")
-    run_command("sudo apt-get update")
     required_packages = ["curl", "gnupg2", "ca-certificates", "lsb-release", "ubuntu-keyring", "apt-transport-https"]
     install_packages(required_packages)
     run_command("curl -s https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null")
     
-    lsb_release = subprocess.run("lsb_release -cs", shell=True, capture_output=True, text=True).stdout.strip()
+    lsb_release = run_command("lsb_release -cs")
     nginx_repo_command = f'echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu {lsb_release} nginx" | sudo tee /etc/apt/sources.list.d/nginx.list'
     run_command(nginx_repo_command)
     
@@ -123,10 +118,9 @@ def install_php_modules():
     install_packages(php_modules_packages)
 
     # librdkafka-dev 및 rdkafka 설치 및 활성화
-    rdkafka_installed = "rdkafka" in subprocess.run("php -m", shell=True, capture_output=True, text=True).stdout
+    rdkafka_installed = "rdkafka" in run_command("php -m")
     if not rdkafka_installed:
-        # Install librdkafka-dev and rdkafka
-        run_command("sudo apt-get install -y librdkafka-dev")
+        install_packages(["librdkafka-dev"])
         run_command("echo "" | sudo pecl install rdkafka")
         run_command(f'echo "extension=rdkafka.so" | sudo tee /etc/php/{PHP_VERSION}/mods-available/rdkafka.ini')
         run_command(f"sudo ln -s /etc/php/{PHP_VERSION}/mods-available/rdkafka.ini /etc/php/{PHP_VERSION}/fpm/conf.d/20-rdkafka.ini")
@@ -167,11 +161,8 @@ def install_laravel_with_composer():
     if os.path.exists(laravel_full_path):
         run_command(f"sudo rm -rf {laravel_full_path}")
 
-    laravel_create_command = f"cd {laravel_project_path} && composer create-project --prefer-dist laravel/laravel {laravel_project_name}"
-    run_command(laravel_create_command)
-
-    laravel_chmod_command = f"sudo chown -R www-data:www-data {laravel_full_path}"
-    run_command(laravel_chmod_command)
+    run_command(f"cd {laravel_project_path} && composer create-project --prefer-dist laravel/laravel {laravel_project_name}")
+    run_command(f"sudo chown -R www-data:www-data {laravel_full_path}")
 
     run_command("sudo systemctl restart nginx")
     print("Laravel installed and configured.")
@@ -180,7 +171,7 @@ def install_laravel_with_composer():
 def main():
     install_nginx()
     install_php_fpm()
-    install_php_modules()
+    #install_php_modules()
     remove_php_fpm()
     install_laravel_with_composer()
     print("All installations and configurations are completed.")
