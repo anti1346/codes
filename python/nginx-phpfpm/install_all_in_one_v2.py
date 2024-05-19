@@ -3,9 +3,12 @@ import subprocess
 import datetime
 import requests
 
+# PHP 버전 및 GitHub 리포지토리 정보
 PHP_VERSION = "8.1"
 GITHUB_CONTENT = "https://raw.githubusercontent.com/anti1346"
 GITHUB_REPOSITORY = "codes/main/python/nginx-phpfpm/conf"
+
+# 다운로드할 파일의 URL
 NGINX_CONF_URL = f"{GITHUB_CONTENT}/{GITHUB_REPOSITORY}/nginx.conf"
 NGINX_DEFAULT_CONF_URL = f"{GITHUB_CONTENT}/{GITHUB_REPOSITORY}/default.conf"
 PHP_FPM_CONF_URL = f"{GITHUB_CONTENT}/{GITHUB_REPOSITORY}/php-fpm.conf"
@@ -48,7 +51,7 @@ def download_config(url, save_path):
 
 # Step 1: Install Nginx
 def install_nginx():
-    print("Installing Nginx...")
+    print("Step 1: Installing and configuring Nginx...")
     required_packages = ["curl", "gnupg2", "ca-certificates", "lsb-release", "ubuntu-keyring", "apt-transport-https"]
     install_packages(required_packages)
     run_command("curl -s https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null")
@@ -59,21 +62,18 @@ def install_nginx():
 
     install_packages(["nginx"])
     
-    print("Configuring Nginx backup...")
     create_backup("/etc/nginx/nginx.conf")
     create_backup("/etc/nginx/conf.d/default.conf")
 
-    print("Configuring Nginx user...")
-    # NGINX nginx.conf 설정 추가
-    ####################################################################################
     download_config(NGINX_CONF_URL, '/etc/nginx/nginx.conf')
     
     run_command("sudo systemctl restart nginx")
+    
     print("Nginx installed and configured.")
 
 # Step 2: Install PHP-FPM
 def install_php_fpm():
-    print("Installing PHP-FPM...")
+    print("Step 2: Installing and configuring PHP-FPM...")
     required_packages = ["zlib1g-dev", "software-properties-common"]
     install_packages(required_packages)
 
@@ -88,19 +88,13 @@ def install_php_fpm():
     ]
     install_packages(php_required_packages)
 
-    print("Configuring PHP-FPM backup...")
     create_backup(f"/etc/php/{PHP_VERSION}/fpm/php-fpm.conf")
     create_backup(f"/etc/php/{PHP_VERSION}/fpm/pool.d/www.conf")
 
     os.makedirs('/var/log/php-fpm', exist_ok=True)
     run_command(f"sudo ln -s /etc/php/{PHP_VERSION} /etc/php/php-fpm", check=False)
 
-    # PHP-FPM php-fpm.conf 설정 추가
-    ####################################################################################
     download_config(PHP_FPM_CONF_URL, f'/etc/php/{PHP_VERSION}/fpm/php-fpm.conf')
-
-    # PHP-FPM www.conf 설정 추가
-    ####################################################################################
     download_config(PHP_FPM_WWW_CONF_URL, f'/etc/php/{PHP_VERSION}/fpm/pool.d/www.conf')
     
     run_command(f"sudo sed -i 's/expose_php = On/expose_php = Off/g' /etc/php/{PHP_VERSION}/cli/php.ini")
@@ -111,15 +105,15 @@ def install_php_fpm():
 
 # Step 3: Install PHP-FPM Modules
 def install_php_modules():
-    print("Installing PHP-FPM modules...")
+    print("Step 3: Installing PHP-FPM modules...")
     php_modules_packages = [f"php{PHP_VERSION}-redis", f"php{PHP_VERSION}-mongodb", f"php{PHP_VERSION}-imagick"]
     install_packages(php_modules_packages)
 
     # librdkafka-dev 및 rdkafka 설치 및 활성화
-    rdkafka_installed = "rdkafka" in run_command("php -m")
+    rdkafka_installed = "rdkafka" in run_command(f"php{PHP_VERSION} -m")
     if not rdkafka_installed:
         install_packages(["librdkafka-dev"])
-        run_command("echo "" | sudo pecl install rdkafka")
+        run_command(f"echo '' | sudo pecl install rdkafka")
         run_command(f'echo "extension=rdkafka.so" | sudo tee /etc/php/{PHP_VERSION}/mods-available/rdkafka.ini')
         run_command(f"sudo ln -s /etc/php/{PHP_VERSION}/mods-available/rdkafka.ini /etc/php/{PHP_VERSION}/fpm/conf.d/20-rdkafka.ini")
         run_command(f"sudo ln -s /etc/php/{PHP_VERSION}/mods-available/rdkafka.ini /etc/php/{PHP_VERSION}/cli/conf.d/20-rdkafka.ini")
@@ -129,7 +123,7 @@ def install_php_modules():
 
 # Step 4: Remove PHP-FPM
 def remove_php_fpm():
-    print("Removing PHP-FPM 8.3 packages...")
+    print("Step 4: Removing PHP-FPM 8.3 packages...")
     required_packages = ["php8.3-common", "php8.3-xml"]
     remove_packages(required_packages)
 
@@ -142,15 +136,13 @@ def remove_php_fpm():
 
 # Step 5: Install Laravel with Composer
 def install_laravel_with_composer():
-    print("Installing Laravel with Composer...")
+    print("Step 5: Installing Laravel with Composer...")
     run_command(f"sudo apt-get install -y php{PHP_VERSION}-intl php{PHP_VERSION}-mbstring")
     run_command(f"sudo systemctl restart php{PHP_VERSION}-fpm")
 
     run_command("sudo apt-get install -y composer")
     run_command("composer global require laravel/installer")
 
-    # NGINX default.conf 설정 추가
-    ####################################################################################
     download_config(NGINX_DEFAULT_CONF_URL, '/etc/nginx/conf.d/default.conf')
     
     laravel_project_path = "/usr/share/nginx/html"
@@ -160,9 +152,11 @@ def install_laravel_with_composer():
         run_command(f"sudo rm -rf {laravel_full_path}")
 
     run_command(f"cd {laravel_project_path} && composer create-project --prefer-dist laravel/laravel {laravel_project_name}")
+    
     run_command(f"sudo chown -R www-data:www-data {laravel_full_path}")
 
     run_command("sudo systemctl restart nginx")
+    
     print("Laravel installed and configured.")
 
 # Main execution
