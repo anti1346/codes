@@ -79,7 +79,10 @@ def install_php_fpm():
 
     run_command("sudo add-apt-repository -y ppa:ondrej/php")
 
-    php_packages = [f"php{PHP_VERSION}-fpm", f"php{PHP_VERSION}-cli", f"php{PHP_VERSION}-common", f"php{PHP_VERSION}-dev"]
+    php_packages = [
+        f"php{PHP_VERSION}-fpm", f"php{PHP_VERSION}-cli", f"php{PHP_VERSION}-common",
+        f"php{PHP_VERSION}-dev"
+    ]
     install_packages(php_packages)
 
     php_required_packages = [
@@ -137,12 +140,9 @@ def remove_php_fpm():
 # Step 5: Install Laravel with Composer
 def install_laravel_with_composer():
     print("Step 5: Installing Laravel with Composer...")
-    run_command(f"sudo apt-get install -y php{PHP_VERSION}-intl php{PHP_VERSION}-mbstring")
+    install_packages([f"php{PHP_VERSION}-intl", f"php{PHP_VERSION}-mbstring", "composer"])
     run_command(f"sudo systemctl restart php{PHP_VERSION}-fpm")
-
-    run_command("sudo apt-get install -y composer")
     run_command("composer global require laravel/installer")
-
     download_config(NGINX_DEFAULT_CONF_URL, '/etc/nginx/conf.d/default.conf')
     
     laravel_project_path = "/usr/share/nginx/html"
@@ -152,7 +152,6 @@ def install_laravel_with_composer():
         run_command(f"sudo rm -rf {laravel_full_path}")
 
     run_command(f"cd {laravel_project_path} && composer create-project --prefer-dist laravel/laravel {laravel_project_name}")
-    
     run_command(f"sudo chown -R www-data:www-data {laravel_full_path}")
 
     run_command("sudo systemctl restart nginx")
