@@ -153,3 +153,7 @@ install_php_fpm
 remove_php_fpm
 install_laravel_with_composer
 echo "All installations and configurations are completed."
+
+
+
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/shell/nginx-phpfpm/install_all_in_one.sh | bash
