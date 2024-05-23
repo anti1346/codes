@@ -29,7 +29,7 @@ def create_mysql_user():
 # 필수 라이브러리 설치
 def install_libraries():
     distro_id = distro.id()
-    if distro_id == 'ubunut':
+    if distro_id == 'ubuntu':
         run_command("sudo apt-get update")
         run_command("sudo apt-get install -y libncurses5 libaio1 libnuma1")
     elif distro_id == 'centos':
