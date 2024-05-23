@@ -52,6 +52,7 @@ def download_and_install_mysql():
         print(f"Downloaded {MYSQL_PACKAGE} to {mysql_package_path}")
 
     os.makedirs(f"{MYSQL_INSTALL_DIR}/data", exist_ok=True)
+    os.makedirs(f"{MYSQL_INSTALL_DIR}/log", exist_ok=True)
     run_command(f"sudo tar xf {mysql_package_path} -C {MYSQL_INSTALL_DIR} --strip-components=1")
     run_command(f"sudo chown -R mysql:mysql {MYSQL_INSTALL_DIR}")
 
