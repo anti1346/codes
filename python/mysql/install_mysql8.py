@@ -51,7 +51,12 @@ def download_and_install_mysql():
     run_command(f"sudo tar xf {mysql_package_path} -C {MYSQL_INSTALL_DIR} --strip-components=1")
     run_command(f"sudo chown -R mysql:mysql {MYSQL_INSTALL_DIR}")
 
-
+# MySQL 환경 변수 등록
+def setup_mysql_environment():
+    bashrc_path = Path.home() / ".bashrc"
+    with open(bashrc_path, "a") as bashrc:
+        if f"{MYSQL_INSTALL_DIR}/bin" not in bashrc.read():
+            bashrc.write(f"\nexport PATH={MYSQL_INSTALL_DIR}/bin:$PATH\n")
 
 
 
@@ -64,4 +69,5 @@ def download_and_install_mysql():
 
 # create_mysql_user()
 # install_libraries()
-download_and_install_mysql()
+# download_and_install_mysql()
+setup_mysql_environment()
