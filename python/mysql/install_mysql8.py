@@ -20,4 +20,10 @@ def run_command(command):
 
 #MySQL 사용자 생성
 def create_mysql_user():
-    if run_command(id mysql").ret
+    if run_command("id mysql").returncode != 0:
+        if run_command("getent group mysql").returncode != 0:
+            run_command("sudo group mysql")
+        run_command("sudo useradd -M -N -g mysql -o -r -d {} -s /bin/false -c 'MySQL Server' -u 27 mysql".format(MYSQL_INSTALL_DIR))
+
+
+create_mysql_user()
