@@ -48,6 +48,6 @@ def download_and_install_mysql():
     run_command(f"sudo tar xf {mysql_package_path} -C {MYSQL_INSTALL_DIR} --strip-components=1")
     run_command(f"sudo chown -R mysql:mysql {MYSQL_INSTALL_DIR}")
 
-create_mysql_user()
-install_libraries()
+# create_mysql_user()
+# install_libraries()
 download_and_install_mysql()
