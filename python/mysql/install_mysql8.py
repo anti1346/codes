@@ -130,12 +130,16 @@ def initialize_mysql_and_save_password():
 
 # MySQL 서버 시작
 def start_mysql():
-    command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld_safe --defaults-file={MY_CNF_PATH} --user=mysql &"
-    result = run_command(command)
-    if result.returncode == 0:
-        print("MySQL server started successfully.")
+    # MySQL이 실행 중인지 확인
+    if not is_mysql_running():
+        command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld_safe --defaults-file={MY_CNF_PATH} --user=mysql &"
+        result = run_command(command)
+        if result.returncode == 0:
+            print("MySQL server started successfully.")
+        else:
+            print("Failed to start MySQL server.")
     else:
-        print("Failed to start MySQL server.")
+        print("MySQL is already running. Skipping initialization.")
 
 # MySQL 버전 확인
 def check_mysql_version():
