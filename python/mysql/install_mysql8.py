@@ -41,7 +41,7 @@ def install_libraries():
 # MySQL 패키지 다운로드 및 설치
 def download_and_install_mysql():
     mysql_package_path = Path(WORK_DIR) / MYSQL_PACKAGE
-    if not mysql_package_path.is_file():
+    if mysql_package_path.is_file():
         print(f"{mysql_package_path} already exists, skipping download.")
     else:
         urllib.request.urlretrieve(f"{MYSQL_DOWNLOAD_URL}/{MYSQL_PACKAGE}", mysql_package_path)
