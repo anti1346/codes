@@ -55,7 +55,9 @@ def download_and_install_mysql():
 def setup_mysql_environment():
     bashrc_path = Path.home() / ".bashrc"
     with open(bashrc_path, "a") as bashrc:
-        if f"{MYSQL_INSTALL_DIR}/bin" not in bashrc.read():
+        content = bashrc.read()
+    if f"{MYSQL_INSTALL_DIR}/bin" not in content:
+        with open(bashrc_path, "a") as bashrc:
             bashrc.write(f"\nexport PATH={MYSQL_INSTALL_DIR}/bin:$PATH\n")
 
 
