@@ -2,6 +2,7 @@ import os
 import subprocess
 import urllib.request
 from pathlib import Path
+import distro
 
 # 설정 값
 MYSQL_VERSION = "8.0.37"
@@ -27,15 +28,15 @@ def create_mysql_user():
 
 # 필수 라이브러리 설치
 def install_libraries():
-    if run_command("command -v apt-get").returncode == 0:
+    distro_id = distro.id()
+    if distro_id == 'ubunut':
         run_command("sudo apt-get update")
         run_command("sudo apt-get install -y libncurses5 libaio1 libnuma1")
-    elif run_command("command -v yum").returncode == 0:
+    elif distro_id == 'centos':
         run_command("sudo yum install -y ncurses-compat-libs libaio numactl")
     else:
         print("Unsupported package manager.")
         exit(1)
-
 
 create_mysql_user()
 install_libraries()
