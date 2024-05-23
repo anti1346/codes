@@ -42,11 +42,25 @@ def install_libraries():
 def download_and_install_mysql():
     mysql_package_path = Path(WORK_DIR) / MYSQL_PACKAGE
     if not mysql_package_path.is_file():
+        print(f"{mysql_package_path} already exists, skipping download.")
+    else:
         urllib.request.urlretrieve(f"{MYSQL_DOWNLOAD_URL}/{MYSQL_PACKAGE}", mysql_package_path)
+        print(f"Downloaded {MYSQL_PACKAGE} to {mysql_package_path}")
 
     os.makedirs(f"{MYSQL_INSTALL_DIR}/data", exist_ok=True)
     run_command(f"sudo tar xf {mysql_package_path} -C {MYSQL_INSTALL_DIR} --strip-components=1")
     run_command(f"sudo chown -R mysql:mysql {MYSQL_INSTALL_DIR}")
+
+
+
+
+
+
+
+
+
+
+
 
 # create_mysql_user()
 # install_libraries()
