@@ -25,5 +25,17 @@ def create_mysql_user():
             run_command("sudo groupadd -r mysql")
         run_command("sudo useradd -M -N -g mysql -o -r -d {} -s /bin/false -c 'MySQL Server' -u 27 mysql".format(MYSQL_INSTALL_DIR))
 
+# 필수 라이브러리 설치
+def install_libraries():
+    if run_command("command -v apt-get").returncode == 0:
+        run_command("sudo apt-get update")
+        run_command("sudo apt-get install -y libncurses5 libaio1 libnuma1")
+    elif run_command("command -v yum").returncode == 0:
+        run_command("sudo yum install -y ncurses-compat-libs libaio numactl")
+    else:
+        print("Unsupported package manager.")
+        exit(1)
+
 
 create_mysql_user()
+install_libraries()
