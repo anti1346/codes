@@ -38,5 +38,16 @@ def install_libraries():
         print("Unsupported package manager.")
         exit(1)
 
+# MySQL 패키지 다운로드 및 설치
+def download_and_install_mysql():
+    mysql_package_path = Path(WORK_DIR) / MYSQL_PACKAGE
+    if not mysql_package_path.is_file():
+        urllib.request.urlretrieve(f"{MYSQL_DOWNLOAD_URL}/{MYSQL_PACKAGE}", mysql_package_path)
+
+    os.makedirs(f"{MYSQL_INSTALL_DIR}/data", exist_ok=True)
+    run_command(f"sudo tar xf {mysql_package_path} -C {MYSQL_INSTALL_DIR} --strip-components=1")
+    run_command(f"sudo chown -R mysql:mysql {MYSQL_INSTALL_DIR}")
+
 create_mysql_user()
 install_libraries()
+download_and_install_mysql()
