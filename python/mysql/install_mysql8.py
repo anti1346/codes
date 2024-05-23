@@ -54,8 +54,10 @@ def download_and_install_mysql():
 # MySQL 환경 변수 등록
 def setup_mysql_environment():
     bashrc_path = Path.home() / ".bashrc"
-    with open(bashrc_path, "a") as bashrc:
+
+    with open(bashrc_path, "r") as bashrc:
         content = bashrc.read()
+
     if f"{MYSQL_INSTALL_DIR}/bin" not in content:
         with open(bashrc_path, "a") as bashrc:
             bashrc.write(f"\nexport PATH={MYSQL_INSTALL_DIR}/bin:$PATH\n")
@@ -69,7 +71,7 @@ def setup_mysql_environment():
 
 
 
-# create_mysql_user()
-# install_libraries()
+create_mysql_user()
+install_libraries()
 # download_and_install_mysql()
 setup_mysql_environment()
