@@ -62,7 +62,11 @@ def setup_mysql_environment():
         with open(bashrc_path, "a") as bashrc:
             bashrc.write(f"\nexport PATH={MYSQL_INSTALL_DIR}/bin:$PATH\n")
 
-
+# MySQL 버전 확인
+def check_mysql_version():
+    result = run_command(f"{MYSQL_INSTALL_DIR}/bin/mysqld -V")
+    print("\nMySQL Version\n---")
+    print(result.stdout)
 
 
 
@@ -75,3 +79,4 @@ create_mysql_user()
 install_libraries()
 # download_and_install_mysql()
 setup_mysql_environment()
+check_mysql_version()
