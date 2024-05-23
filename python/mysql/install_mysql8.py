@@ -78,28 +78,30 @@ def write_my_cnf():
     
     print(f"my_cnf written to {MY_CNF_PATH}")
 
+# MySQL이 실행 중인지 확인
+def is_mysql_running():
+    try:
+        # ps 명령어를 사용하여 MySQL 프로세스가 실행 중인지 확인
+        result = subprocess.run(['ps', '-A'], capture_output=True, text=True)
+        if 'mysqld' in result.stdout:
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"An error occurred while checking MySQL status: {e}")
+        return False
+
 # MySQL 초기화 및 비밀번호 저장
 def initialize_mysql_and_save_password():
-    command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld --defaults-file={MY_CNF_PATH} --initialize --user=mysql"
-    result = run_command(command)
+    # MySQL이 실행 중인지 확인
+    if not is_mysql_running():
+        print("MySQL is not running. Initializing and saving password...")
+        command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld --defaults-file={MY_CNF_PATH} --initialize --user=mysql"
+        result = run_command(command)
 
-    if result.returncode == 0:
-        # 초기화 출력에서 임시 비밀번호 추출
-        match = re.search(r"temporary password is generated for root@localhost: (\S+)", result.stderr)
-        if match:
-            temp_password = match.group(1)
-            # 비밀번호를 파일에 저장
-            with open(PASSWORD_FILE_PATH, "w") as file:
-                file.write(f"Temporary MySQL root password: {temp_password}\n")
-            print(f"Temporary MySQL root password saved to {PASSWORD_FILE_PATH}")
-        else:
-            print("Failed to find the temporary password in the output.")
-    else:
-        # 에러 로그에서 비밀번호 가져오기 시도
-        error_log_path = "/usr/local/mysql/log/error.log"
-        with open(error_log_path, "r") as error_log:
-            error_log_content = error_log.read()
-            match = re.search(r"temporary password is generated for root@localhost: (\S+)", error_log_content)
+        if result.returncode == 0:
+            # 초기화 출력에서 임시 비밀번호 추출
+            match = re.search(r"A temporary password is generated for root@localhost: (\S+)", result.stderr)
             if match:
                 temp_password = match.group(1)
                 # 비밀번호를 파일에 저장
@@ -107,8 +109,24 @@ def initialize_mysql_and_save_password():
                     file.write(f"Temporary MySQL root password: {temp_password}\n")
                 print(f"Temporary MySQL root password saved to {PASSWORD_FILE_PATH}")
             else:
-                print("Failed to find the temporary password in the error log.")
-                print(f"Error log content:\n{error_log_content}")
+                print("Failed to find the temporary password in the output.")
+        else:
+            # 에러 로그에서 비밀번호 가져오기 시도
+            error_log_path = "/usr/local/mysql/log/error.log"
+            with open(error_log_path, "r") as error_log:
+                error_log_content = error_log.read()
+                match = re.search(r"A temporary password is generated for root@localhost: (\S+)", error_log_content)
+                if match:
+                    temp_password = match.group(1)
+                    # 비밀번호를 파일에 저장
+                    with open(PASSWORD_FILE_PATH, "w") as file:
+                        file.write(f"Temporary MySQL root password: {temp_password}\n")
+                    print(f"Temporary MySQL root password saved to {PASSWORD_FILE_PATH}")
+                else:
+                    print("Failed to find the temporary password in the error log.")
+                    print(f"Error log content:\n{error_log_content}")
+    else:
+        print("MySQL is already running. Skipping initialization.")
 
 # MySQL 서버 시작
 def start_mysql():
