@@ -98,6 +98,16 @@ def is_mysql_running():
         print(f"An error occurred while checking MySQL status: {e}")
         return False
 
+def get_mysql_temp_password():
+    error_log_path = "/usr/local/mysql/log/error.log"
+    with open(error_log_path, "r") as error_log:
+        error_log_content = error_log.read()
+        match = re.search(r"A temporary password is generated for root@localhost: (\S+)", error_log_content)
+        if match:
+            return match.group(1)
+        else:
+            return None
+
 # MySQL 초기화 및 비밀번호 저장
 def initialize_mysql_and_save_password():
     if not is_mysql_running():
