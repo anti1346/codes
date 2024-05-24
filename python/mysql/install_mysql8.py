@@ -101,7 +101,7 @@ def is_mysql_running():
 def initialize_mysql_and_save_password():
     if not is_mysql_running():
         print("MySQL is not running. Initializing and saving password...")
-        os.remove(f"{MYSQL_INSTALL_DIR}")
+        os.remove(f"{MYSQL_INSTALL_DIR}/data")
         result = run_command(f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld --defaults-file={MY_CNF_PATH} --initialize --user=mysql")
         if result.returncode == 0:
             temp_password = get_mysql_temp_password()
