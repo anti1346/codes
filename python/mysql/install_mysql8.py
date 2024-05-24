@@ -89,15 +89,48 @@ def write_my_cnf():
 # MySQL이 실행 중인지 확인
 def is_mysql_running():
     try:
-        result = subprocess.run(['ps', '-A'], capture_output=True, text=True)
-        if 'mysqld' in result.stdout:
-            return True
-        else:
-            return False
+        result = subprocess.run(['pgrep', 'mysqld'], capture_output=True, text=True)
+        return result.returncode == 0
     except Exception as e:
         print(f"An error occurred while checking MySQL status: {e}")
         return False
 
+# MySQL 초기화 및 비밀번호 저장
+def initialize_mysql():
+    if is_mysql_running():
+        print("MySQL is already running. Skipping initialization.")
+        return
+
+    print("Initializing MySQL...")
+    shutil.rmtree(f"{MYSQL_INSTALL_DIR}/data")
+    result = run_command(f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld --defaults-file={MY_CNF_PATH} --initialize --user=mysql")
+    if result.returncode == 0:
+        temp_password = get_mysql_temp_password()
+        if temp_password:
+            with open(PASSWORD_FILE_PATH, "w") as file:
+                file.write(f"Temporary MySQL root password: {temp_password}\n")
+            print(f"Temporary MySQL root password saved to {PASSWORD_FILE_PATH}")
+            start_mysql()
+        else:
+            print("Failed to find the temporary password in the error log.")
+    else:
+        print("Failed to initialize MySQL.")
+
+# MySQL 서버 시작
+def start_mysql():
+    if is_mysql_running():
+        print("MySQL is already running. Skipping start.")
+        return
+
+    print("Starting MySQL server...")
+    command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld_safe --defaults-file={MY_CNF_PATH} --user=mysql &"
+    result = run_command(command)
+    if result.returncode == 0:
+        print("MySQL server started successfully.")
+    else:
+        print("Failed to start MySQL server.")
+
+# 임시 MySQL 비밀번호 가져오기
 def get_mysql_temp_password():
     error_log_path = "/usr/local/mysql/log/error.log"
     with open(error_log_path, "r") as error_log:
@@ -107,37 +140,6 @@ def get_mysql_temp_password():
             return match.group(1)
         else:
             return None
-
-# MySQL 초기화 및 비밀번호 저장
-def initialize_mysql_and_save_password():
-    if not is_mysql_running():
-        print("MySQL is not running. Initializing and saving password...")
-        shutil.rmtree(f"{MYSQL_INSTALL_DIR}/data")
-        result = run_command(f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld --defaults-file={MY_CNF_PATH} --initialize --user=mysql")
-        if result.returncode == 0:
-            temp_password = get_mysql_temp_password()
-            if temp_password:
-                with open(PASSWORD_FILE_PATH, "w") as file:
-                    file.write(f"Temporary MySQL root password: {temp_password}\n")
-                print(f"Temporary MySQL root password saved to {PASSWORD_FILE_PATH}")
-            else:
-                print("Failed to find the temporary password in the error log.")
-        else:
-            print("Failed to initialize MySQL.")
-    else:
-        print("MySQL is already running. Skipping initialization.")
-
-# MySQL 서버 시작
-def start_mysql():
-    if not is_mysql_running():
-        command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld_safe --defaults-file={MY_CNF_PATH} --user=mysql &"
-        result = run_command(command)
-        if result.returncode == 0:
-            print("MySQL server started successfully.")
-        else:
-            print("Failed to start MySQL server.")
-    else:
-        print("MySQL is already running. Skipping initialization.")
 
 # MySQL 버전 확인
 def check_mysql_version():
@@ -151,8 +153,8 @@ def main():
     download_and_install_mysql()
     write_my_cnf()
     setup_mysql_environment()
-    initialize_mysql_and_save_password()
-    # start_mysql()
+    initialize_mysql()
+    start_mysql
     check_mysql_version()
 
 if __name__ == "__main__":
