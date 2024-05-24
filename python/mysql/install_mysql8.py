@@ -152,7 +152,7 @@ def main():
     write_my_cnf()
     setup_mysql_environment()
     initialize_mysql_and_save_password()
-    start_mysql()
+    # start_mysql()
     check_mysql_version()
 
 if __name__ == "__main__":
