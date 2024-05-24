@@ -125,10 +125,12 @@ def start_mysql():
     print("Starting MySQL server...")
     command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld_safe --defaults-file={MY_CNF_PATH} --user=mysql &"
     subprocess.Popen(command, shell=True)
-    if result.returncode == 0:
-        print("MySQL server started successfully.")
+    
+    if is_mysql_running():
+        print("MySQL server started successfully")
     else:
         print("Failed to start MySQL server.")
+        return
 
 # 임시 MySQL 비밀번호 가져오기
 def get_mysql_temp_password():
