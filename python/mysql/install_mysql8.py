@@ -123,7 +123,7 @@ def start_mysql():
         return
 
     print("Starting MySQL server...")
-    command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld_safe --defaults-file={MY_CNF_PATH} --user=mysql &"
+    command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld_safe --defaults-file={MY_CNF_PATH} --user=mysql > /dev/null 2>&1 &"
     subprocess.Popen(command, shell=True)
 
 # 임시 MySQL 비밀번호 가져오기
