@@ -33,3 +33,5 @@ def check_vault_version():
 
 if __name__ == "__main__":
     install_vault()
+    check_vault_version()
+
