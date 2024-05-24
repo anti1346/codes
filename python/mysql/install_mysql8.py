@@ -127,6 +127,7 @@ def start_mysql():
     result = run_command(command)
     if result.returncode == 0:
         print("MySQL server started successfully.")
+        exit(0)
     else:
         print("Failed to start MySQL server.")
 
