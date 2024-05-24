@@ -1,11 +1,13 @@
 import os
 import subprocess
 import urllib.request
-from pathlib import Path
 import distro
 import re
+import pwd
+import grp
+from pathlib import Path
 
-# 설정 값
+# 설정 값 정의
 MYSQL_VERSION = "8.0.37"
 GLIBC_VERSION = "2.28"
 MYSQL_DOWNLOAD_URL = f"https://dev.mysql.com/get/Downloads/MySQL-8.0"
@@ -16,6 +18,7 @@ MY_CNF_PATH = f"{MYSQL_INSTALL_DIR}/my.cnf"
 MY_CNF_URL = "https://raw.githubusercontent.com/anti1346/codes/main/python/mysql/my.cnf"
 PASSWORD_FILE_PATH = f"{MYSQL_INSTALL_DIR}/mysql_password.txt"
 
+# 명령어 실행 함수
 def run_command(command):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     if result.returncode != 0:
@@ -23,12 +26,16 @@ def run_command(command):
         print(result.stderr)
     return result
 
-# MySQL 사용자 생성
+# MySQL 사용자 및 그룹 생성
 def create_mysql_user():
-    if run_command("id mysql").returncode != 0:
-        if run_command("getent group mysql").returncode != 0:
-            run_command("sudo groupadd -r mysql")
-        run_command("sudo useradd -M -N -g mysql -o -r -d {} -s /bin/false -c 'MySQL Server' -u 27 mysql".format(MYSQL_INSTALL_DIR))
+    user_exists = 'mysql' in (user.pw_name for user in pwd.getpwall())
+    group_exists = 'mysql' in (group.gr_name for group in grp.getgrall())
+
+    if not group_exists:
+        run_command("sudo groupadd -r mysql")
+    if not user_exists:
+        run_command(f"sudo useradd -M -N -g mysql -o -r -d {MYSQL_INSTALL_DIR} -s /bin/false -c 'MySQL Server' -u 27 mysql")
+        
 
 # 필수 라이브러리 설치
 def install_libraries():
@@ -81,7 +88,6 @@ def write_my_cnf():
 # MySQL이 실행 중인지 확인
 def is_mysql_running():
     try:
-        # ps 명령어를 사용하여 MySQL 프로세스가 실행 중인지 확인
         result = subprocess.run(['ps', '-A'], capture_output=True, text=True)
         if 'mysqld' in result.stdout:
             return True
@@ -93,44 +99,24 @@ def is_mysql_running():
 
 # MySQL 초기화 및 비밀번호 저장
 def initialize_mysql_and_save_password():
-    # MySQL이 실행 중인지 확인
     if not is_mysql_running():
         print("MySQL is not running. Initializing and saving password...")
-        command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld --defaults-file={MY_CNF_PATH} --initialize --user=mysql"
-        result = run_command(command)
-
+        result = run_command(f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld --defaults-file={MY_CNF_PATH} --initialize --user=mysql")
         if result.returncode == 0:
-            # 초기화 출력에서 임시 비밀번호 추출
-            match = re.search(r"A temporary password is generated for root@localhost: (\S+)", result.stderr)
-            if match:
-                temp_password = match.group(1)
-                # 비밀번호를 파일에 저장
+            temp_password = get_mysql_temp_password()
+            if temp_password:
                 with open(PASSWORD_FILE_PATH, "w") as file:
                     file.write(f"Temporary MySQL root password: {temp_password}\n")
                 print(f"Temporary MySQL root password saved to {PASSWORD_FILE_PATH}")
             else:
-                print("Failed to find the temporary password in the output.")
+                print("Failed to find the temporary password in the error log.")
         else:
-            # 에러 로그에서 비밀번호 가져오기 시도
-            error_log_path = "/usr/local/mysql/log/error.log"
-            with open(error_log_path, "r") as error_log:
-                error_log_content = error_log.read()
-                match = re.search(r"A temporary password is generated for root@localhost: (\S+)", error_log_content)
-                if match:
-                    temp_password = match.group(1)
-                    # 비밀번호를 파일에 저장
-                    with open(PASSWORD_FILE_PATH, "w") as file:
-                        file.write(f"Temporary MySQL root password: {temp_password}\n")
-                    print(f"Temporary MySQL root password saved to {PASSWORD_FILE_PATH}")
-                else:
-                    print("Failed to find the temporary password in the error log.")
-                    print(f"Error log content:\n{error_log_content}")
+            print("Failed to initialize MySQL.")
     else:
         print("MySQL is already running. Skipping initialization.")
 
 # MySQL 서버 시작
 def start_mysql():
-    # MySQL이 실행 중인지 확인
     if not is_mysql_running():
         command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld_safe --defaults-file={MY_CNF_PATH} --user=mysql &"
         result = run_command(command)
