@@ -128,8 +128,6 @@ def start_mysql():
     
     if is_mysql_running():
         print("MySQL server started successfully")
-    else:
-        print("Failed to start MySQL server.")
         return
 
 # 임시 MySQL 비밀번호 가져오기
