@@ -26,7 +26,10 @@ def install_vault():
 
     install_packages(["vault"])
 
+def check_vault_version():
+    result = run_command(f"vault --version")
+    print("\nVault Version\n---")
+    print(result.stdout)
+
 if __name__ == "__main__":
     install_vault()
-
-
