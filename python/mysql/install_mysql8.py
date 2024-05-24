@@ -123,10 +123,9 @@ def start_mysql():
         return
 
     print("Starting MySQL server...")
-    command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld_safe --defaults-file={MY_CNF_PATH} --user=mysql"
-    process = subprocess.Popen(command, shell=True)
-    process.wait()
-    if process.returncode == 0:
+    command = f"sudo {MYSQL_INSTALL_DIR}/bin/mysqld_safe --defaults-file={MY_CNF_PATH} --user=mysql &"
+    result = run_command(command)
+    if result.returncode == 0:
         print("MySQL server started successfully.")
     else:
         print("Failed to start MySQL server.")
