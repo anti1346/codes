@@ -18,7 +18,7 @@ def install_packages(packages):
         run_command(f"sudo apt-get install -y {package}")
 
 def install_vault():
-    install_packages(["gpg"])
+    install_packages(["gpg", "lsb-release"])
     run_command("curl -s https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg >/dev/null")
 
     lsb_release = run_command("lsb_release -cs")
