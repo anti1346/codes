@@ -29,7 +29,7 @@ EOF
 
 # Navigate to the directory and bring up the container
 cd ${ContainerDir}
-docker-compose up -d
+docker compose up -d
 
 echo "cAdvisor is running. Access it at http://localhost:8080"
 
