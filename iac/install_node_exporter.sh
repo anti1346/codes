@@ -3,8 +3,11 @@
 Version=${Version:-1.8.1}
 Arch=${Arch:-amd64}
 
-if [[ "$(uname)" == "Ubuntu" ] && [ "$(uname)" == "CentOS" ]]; then
-    # Ubuntu, CentOS
+if command -v apt &> /dev/null; then
+    # Ubuntu
+    OS=linux
+elif command -v yum &> /dev/null; then
+    # CentOS
     OS=linux
 elif [[ "$(uname)" == "Darwin" ]]; then
     # macOS
