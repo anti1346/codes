@@ -46,15 +46,19 @@ ExecStart=/usr/local/bin/node_exporter
 WantedBy=multi-user.target
 EOF
 
-# Reload systemd and enable service
-systemctl daemon-reload
-systemctl enable node_exporter --now
+# Reload systemd
+sudo systemctl daemon-reload
 
-echo "Node Exporter is running. Access metrics at: http://localhost:9100/metrics"
+# Reload systemd and enable service if port 9100 is not in use
+if ! lsof -i:9100 &>/dev/null; then
+    sudo systemctl --now enable node_exporter
+    echo "Node Exporter is running. Access metrics at: curl http://localhost:9100/metrics"
+else
+    echo "Port 9100 is already in use. Node Exporter will not be started."
+fi
 
 
 
 ### Shell Execute Command
 # curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/iac/install_node_exporter.sh | bash
 # curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/iac/install_node_exporter.sh | dos2unix | bash
-
