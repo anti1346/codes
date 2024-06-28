@@ -50,3 +50,11 @@ echo $OS
 # systemctl enable node_exporter --now
 
 # echo "Node Exporter is running. Access metrics at: http://localhost:9100/metrics"
+
+
+
+
+### Shell Execute Command
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/iac/install_node_exporter.sh | bash
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/iac/install_node_exporter.sh | dos2unix | bash
+
