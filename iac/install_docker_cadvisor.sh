@@ -36,6 +36,5 @@ echo "cAdvisor is running. Access it at http://localhost:8080"
 
 
 ### Shell Execute Command
-# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/iac/install_node_exporter.sh | bash
-# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/iac/install_node_exporter.sh | dos2unix | bash
-
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/iac/install_docker_cadvisor.sh | bash
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/iac/install_docker_cadvisor.sh | dos2unix | bash
