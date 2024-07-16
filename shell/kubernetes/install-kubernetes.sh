@@ -10,7 +10,8 @@ sudo add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/u
 
 # Docker 및 containerd 설치
 sudo apt-get update
-sudo apt-get install -y containerd.io
+sudo apt-get install -y containerd
+# sudo apt-get install -y containerd.io
 
 # containerd 설정 및 재시작
 containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
@@ -18,8 +19,29 @@ sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/conf
 sudo systemctl restart containerd
 sudo systemctl enable containerd
 
+# # CNI 설정 파일
+# sudo cat <<EOF> /etc/cni/net.d/10-bridge.conf 
+# {
+#   "cniVersion": "0.3.1",
+#   "name": "my-bridge-network",
+#   "type": "bridge",
+#   "bridge": "cni0",
+#   "isGateway": true,
+#   "ipMasq": true,
+#   "ipam": {
+#     "type": "host-local",
+#     "subnet": "10.22.0.0/16",
+#     "routes": [
+#       { "dst": "0.0.0.0/0" }
+#     ]
+#   }
+# }
+# EOF
+# sudo systemctl restart containerd
+
 # Kubernetes GPG 키 추가 및 리포지토리 설정
 sudo mkdir -p -m 755 /etc/apt/keyrings
+sudo rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
@@ -34,7 +56,7 @@ sudo systemctl daemon-reload
 sudo systemctl restart kubelet
 sudo systemctl enable kubelet
 
-sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
+#sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
 
 
 ##### Verify #####
