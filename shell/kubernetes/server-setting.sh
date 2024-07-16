@@ -30,6 +30,7 @@ sudo sysctl --system
 # 시스템 재기동
 # reboot
 
+# sudo cat /sys/class/dmi/id/product_uuid
 # systemctl status ufw
 # swapon -s
 # lsmod | grep "overlay\|br_netfilter"
