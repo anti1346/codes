@@ -70,6 +70,9 @@ sudo systemctl enable kubelet
 
 sudo systemctl restart containerd kubelet
 
+
+crictl config --set runtime-endpoint=unix:///run/containerd/containerd.sock
+
 -----
 sudo vim /etc/default/grub
 GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
