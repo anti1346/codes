@@ -49,7 +49,8 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 # Kubernetes 구성 요소
 mkdir -p /etc/systemd/system/kubelet.service.d
-touch /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+echo 'KUBELET_EXTRA_ARGS="--container-runtime-endpoint=unix:///run/containerd/containerd.sock"' | sudo tee /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+# echo 'KUBELET_EXTRA_ARGS="--container-runtime-endpoint=unix:///run/containerd/containerd.sock"' | sudo tee /etc/default/kubelet
 # kubeadm init phase kubelet-start
 
 # kubelet 설정 및 재시작
@@ -61,6 +62,10 @@ sudo systemctl enable kubelet
 # sudo systemctl status kubelet --no-pager
 # sudo journalctl -u kubelet -f
 # sudo journalctl -u kubelet -n 100 --no-pager
+# sudo journalctl -xeu kubelet
 
 
 #sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
+
+
+
