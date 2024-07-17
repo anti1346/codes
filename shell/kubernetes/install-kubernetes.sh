@@ -14,7 +14,7 @@ sudo apt-get update
 sudo apt-get install -y containerd
 
 # containerd 설정 및 재시작
-mkdir -p /etc/containerd
+sudo mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
 sudo systemctl restart containerd
