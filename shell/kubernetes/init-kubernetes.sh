@@ -2,6 +2,8 @@
 
 sudo kubeadm config images pull --cri-socket unix:///var/run/containerd/containerd.sock
 
+sudo systemctl stop kubelet
+
 sudo kubeadm init --pod-network-cidr 10.244.0.0/16 --apiserver-advertise-address=192.168.56.111 --cri-socket unix:///var/run/containerd/containerd.sock
 
 

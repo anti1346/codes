@@ -12,7 +12,6 @@ sudo add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/u
 # Docker 및 containerd 설치
 sudo apt-get update
 sudo apt-get install -y containerd
-# sudo apt-get install -y containerd.io
 
 # containerd 설정 및 재시작
 mkdir -p /etc/containerd
@@ -27,29 +26,15 @@ CNI_TGZ=https://github.com/containernetworking/plugins/releases/download/$CNI_VE
 sudo mkdir -p /opt/cni/bin
 curl -fsSL $CNI_TGZ | sudo tar -C /opt/cni/bin -xz
 
-# # CNI 설정 파일
-# sudo cat <<EOF> /etc/cni/net.d/10-bridge.conf 
-# {
-#   "cniVersion": "0.3.1",
-#   "name": "my-bridge-network",
-#   "type": "bridge",
-#   "bridge": "cni0",
-#   "isGateway": true,
-#   "ipMasq": true,
-#   "ipam": {
-#     "type": "host-local",
-#     "subnet": "10.22.0.0/16",
-#     "routes": [
-#       { "dst": "0.0.0.0/0" }
-#     ]
-#   }
-# }
-# EOF
+###################################################################
+# ls -l /opt/cni/bin
 # sudo systemctl restart containerd
 # cat /etc/containerd/config.toml | egrep SystemdCgroup
 # sudo containerd config dump | egrep SystemdCgroup
-# sudo systemctl status containerd
-# sudo journalctl -u containerd --no-pager -f
+# sudo systemctl status containerd --no-pager
+# sudo journalctl -u containerd -f
+
+
 
 # Kubernetes GPG 키 추가 및 리포지토리 설정
 sudo mkdir -p -m 755 /etc/apt/keyrings
@@ -62,21 +47,20 @@ sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 
-kubeadm init phase kubelet-start
+# Kubernetes 구성 요소
+mkdir -p /etc/systemd/system/kubelet.service.d
+touch /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+# kubeadm init phase kubelet-start
 
 # kubelet 설정 및 재시작
-mkdir /etc/systemd/system/kubelet.service.d/
-touch /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-
-echo 'KUBELET_EXTRA_ARGS=--container-runtime-endpoint=unix:///run/containerd/containerd.sock' | sudo tee /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
 sudo systemctl enable kubelet
-# sudo systemctl status kubelet
+
+###################################################################
+# sudo systemctl status kubelet --no-pager
 # sudo journalctl -u kubelet -f
 # sudo journalctl -u kubelet -n 100 --no-pager
 
 
 #sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
-
