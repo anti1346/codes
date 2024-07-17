@@ -20,11 +20,6 @@ containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
 sudo systemctl restart containerd
 sudo systemctl enable containerd
-# cat /etc/containerd/config.toml | egrep SystemdCgroup
-# sudo containerd config dump | egrep SystemdCgroup
-# sudo systemctl status containerd
-# sudo journalctl -u containerd -f
-
 
 # containerd CNI 플러그인 
 CNI_VERSION=v1.5.1
@@ -51,6 +46,10 @@ curl -fsSL $CNI_TGZ | sudo tar -C /opt/cni/bin -xz
 # }
 # EOF
 # sudo systemctl restart containerd
+# cat /etc/containerd/config.toml | egrep SystemdCgroup
+# sudo containerd config dump | egrep SystemdCgroup
+# sudo systemctl status containerd
+# sudo journalctl -u containerd --no-pager -f
 
 # Kubernetes GPG 키 추가 및 리포지토리 설정
 sudo mkdir -p -m 755 /etc/apt/keyrings
