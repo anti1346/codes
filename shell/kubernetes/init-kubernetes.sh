@@ -25,6 +25,6 @@ source /etc/bash_completion
 ### Kubernetes Documentation - Ports and Protocols : https://kubernetes.io/docs/reference/networking/ports-and-protocols/
 
 
-
+sudo kubeadm reset
 
 

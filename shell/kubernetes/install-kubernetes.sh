@@ -9,79 +9,34 @@ sudo rm -f /etc/apt/trusted.gpg.d/docker.gpg
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/docker.gpg
 sudo add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
-# Docker 및 containerd 설치
+# Containerd 설치
 sudo apt-get update
-# sudo apt-get install -y containerd
-sudo apt-get install -y docker-ce
+sudo apt-get install -y containerd.io
 
 # containerd 설정 및 재시작
 sudo mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
-sudo systemctl restart containerd
-sudo systemctl enable containerd
+sudo systemctl --now enable containerd
 
 # containerd CNI 플러그인 
-CNI_VERSION=v1.5.1
-CNI_TGZ=https://github.com/containernetworking/plugins/releases/download/$CNI_VERSION/cni-plugins-linux-amd64-$CNI_VERSION.tgz
+CNI_VERSION="v1.5.1"
+CNI_TGZ=https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-linux-amd64-${CNI_VERSION}.tgz
 sudo mkdir -p /opt/cni/bin
 curl -fsSL $CNI_TGZ | sudo tar -C /opt/cni/bin -xz
 
-###################################################################
-# ls -l /opt/cni/bin
-# sudo systemctl restart containerd
-# cat /etc/containerd/config.toml | egrep SystemdCgroup
-# sudo containerd config dump | egrep SystemdCgroup
-# sudo systemctl status containerd --no-pager -l
-# sudo journalctl -u containerd -f
-
-
-
 # Kubernetes GPG 키 추가 및 리포지토리 설정
+KUBERNETES_VERSION="v1.27"
 sudo mkdir -p -m 755 /etc/apt/keyrings
 sudo rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://pkgs.k8s.io/core:/stable:/${KUBERNETES_VERSION}/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/${KUBERNETES_VERSION}/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 # Kubernetes 구성 요소 설치 및 고정
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
-
-# Kubernetes 구성 요소
-sudo mkdir -p /etc/systemd/system/kubelet.service.d
-echo -e '[Service]\nEnvironment="KUBELET_EXTRA_ARGS=--container-runtime-endpoint=unix:///run/containerd/containerd.sock --cgroup-driver=systemd"' | sudo tee /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-# echo 'KUBELET_EXTRA_ARGS="--container-runtime-endpoint=unix:///run/containerd/containerd.sock"' | sudo tee /etc/default/kubelet
-# kubeadm init phase kubelet-start
+sudo systemctl --now enable kubelet
 
 # kubelet 설정 및 재시작
 sudo systemctl daemon-reload; sudo systemctl restart kubelet
-sudo systemctl enable kubelet
-
-###################################################################
-# sudo systemctl status kubelet --no-pager -l
-# sudo journalctl -u kubelet -f
-# sudo journalctl -u kubelet -n 100 --no-pager
-# sudo journalctl -xeu kubelet --no-pager -l
-
-
-#sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
-
-
-sudo systemctl restart containerd kubelet
-
-
-crictl config --set runtime-endpoint=unix:///run/containerd/containerd.sock
-
------
-sudo vim /etc/default/grub
-GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
-sudo update-grub
-sudo reboot
------
-
-
-kubeadm certs check-expiration
-
-kubeadm certs renew all
-
