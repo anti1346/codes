@@ -4,16 +4,9 @@
 sudo apt-get update
 sudo apt-get install -y gnupg2 software-properties-common apt-transport-https ca-certificates lsb-release curl
 
-# Kubernetes GPG 키 추가 및 리포지토리 설정
-sudo mkdir -p -m 755 /etc/apt/keyrings
-sudo rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-# curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-# echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-
 # Docker GPG 키 추가 및 Docker 리포지토리 설정
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/docker.gpg
+sudo rm -f /etc/apt/trusted.gpg.d/docker.gpg
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/docker.gpg
 sudo add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
 # Docker 및 containerd 설치
@@ -26,6 +19,12 @@ containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
 sudo systemctl restart containerd
 sudo systemctl enable containerd
+
+# containerd CNI 플러그인 
+CNI_VERSION=v1.5.1
+CNI_TGZ=https://github.com/containernetworking/plugins/releases/download/$CNI_VERSION/cni-plugins-linux-amd64-$CNI_VERSION.tgz
+sudo mkdir -p /opt/cni/bin
+curl -fsSL $CNI_TGZ | sudo tar -C /opt/cni/bin -xz
 
 # # CNI 설정 파일
 # sudo cat <<EOF> /etc/cni/net.d/10-bridge.conf 
@@ -48,8 +47,11 @@ sudo systemctl enable containerd
 # sudo systemctl restart containerd
 
 # Kubernetes GPG 키 추가 및 리포지토리 설정
-
-
+sudo mkdir -p -m 755 /etc/apt/keyrings
+sudo rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 # Kubernetes 구성 요소 설치 및 고정
 sudo apt-get update
