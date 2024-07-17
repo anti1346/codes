@@ -2,7 +2,7 @@
 
 sudo kubeadm config images pull --cri-socket unix:///var/run/containerd/containerd.sock
 
-# sudo systemctl stop kubelet
+sudo systemctl stop kubelet
 # rm -f /etc/kubernetes/manifests/{kube-apiserver.yaml,kube-controller-manager.yaml,kube-scheduler.yaml,etcd.yaml}
 
 sudo kubeadm init --pod-network-cidr 10.244.0.0/16

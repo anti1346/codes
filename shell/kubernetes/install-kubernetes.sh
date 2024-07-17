@@ -11,7 +11,8 @@ sudo add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/u
 
 # Docker 및 containerd 설치
 sudo apt-get update
-sudo apt-get install -y containerd
+# sudo apt-get install -y containerd
+sudo apt-get install -y docker-ce
 
 # containerd 설정 및 재시작
 sudo mkdir -p /etc/containerd
@@ -31,7 +32,7 @@ curl -fsSL $CNI_TGZ | sudo tar -C /opt/cni/bin -xz
 # sudo systemctl restart containerd
 # cat /etc/containerd/config.toml | egrep SystemdCgroup
 # sudo containerd config dump | egrep SystemdCgroup
-# sudo systemctl status containerd --no-pager
+# sudo systemctl status containerd --no-pager -l
 # sudo journalctl -u containerd -f
 
 
@@ -48,24 +49,36 @@ sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 
 # Kubernetes 구성 요소
-mkdir -p /etc/systemd/system/kubelet.service.d
-echo 'KUBELET_EXTRA_ARGS="--container-runtime-endpoint=unix:///run/containerd/containerd.sock"' | sudo tee /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+sudo mkdir -p /etc/systemd/system/kubelet.service.d
+echo -e '[Service]\nEnvironment="KUBELET_EXTRA_ARGS=--container-runtime-endpoint=unix:///run/containerd/containerd.sock --cgroup-driver=systemd"' | sudo tee /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 # echo 'KUBELET_EXTRA_ARGS="--container-runtime-endpoint=unix:///run/containerd/containerd.sock"' | sudo tee /etc/default/kubelet
 # kubeadm init phase kubelet-start
 
 # kubelet 설정 및 재시작
-sudo systemctl daemon-reload
-sudo systemctl restart kubelet
+sudo systemctl daemon-reload; sudo systemctl restart kubelet
 sudo systemctl enable kubelet
 
 ###################################################################
-# sudo systemctl status kubelet --no-pager
+# sudo systemctl status kubelet --no-pager -l
 # sudo journalctl -u kubelet -f
 # sudo journalctl -u kubelet -n 100 --no-pager
-# sudo journalctl -xeu kubelet
+# sudo journalctl -xeu kubelet --no-pager -l
 
 
 #sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
 
 
+sudo systemctl restart containerd kubelet
+
+-----
+sudo vim /etc/default/grub
+GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
+sudo update-grub
+sudo reboot
+-----
+
+
+kubeadm certs check-expiration
+
+kubeadm certs renew all
 
