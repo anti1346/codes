@@ -78,6 +78,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 ###################################################################
 #### kubelet
+# sudo systemctl restart kubelet
 # sudo systemctl status kubelet --no-pager -l
 # sudo journalctl -u kubelet -f
 # sudo journalctl -u kubelet -n 100 --no-pager
