@@ -121,3 +121,7 @@ case "$1" in
         echo "Usage: $0 {system|cri|init|control_plane|worker|control_plane_nodes|worker_nodes|cni}"
         exit 1;;
 esac
+
+
+
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/shell/kubernetes/setup_kubernetes_cluster.sh -o setup_kubernetes_cluster.sh

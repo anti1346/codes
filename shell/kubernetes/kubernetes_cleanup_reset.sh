@@ -63,3 +63,7 @@ case "$1" in
 esac
 
 echo "Kubernetes components and related files have been successfully cleaned up."
+
+
+
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/shell/kubernetes/kubernetes_cleanup_reset.sh -o setup_kubernetes_cluster.sh
