@@ -2,6 +2,18 @@
 
 set -e
 
+kubeadm init phase certs ca
+kubeadm init phase certs apiserver
+kubeadm init phase certs apiserver-kubelet-client
+kubeadm init phase certs front-proxy-ca
+kubeadm init phase certs front-proxy-client
+kubeadm init phase certs etcd-ca
+kubeadm init phase certs etcd-server
+kubeadm init phase certs etcd-peer
+kubeadm init phase certs etcd-healthcheck-client
+kubeadm init phase certs apiserver-etcd-client
+kubeadm init phase certs sa
+
 cat <<EOF | sudo tee kubeadm-config.yaml
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
@@ -41,3 +53,9 @@ networking:
 EOF
 
 kubeadm init --config kubeadm-config.yaml
+
+
+
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/shell/kubernetes/kubeadm-config.sh -o kubeadm-config.sh
+# chmod +x kubeadm-config.sh
+
