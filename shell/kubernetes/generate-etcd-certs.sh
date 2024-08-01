@@ -152,3 +152,8 @@ openssl req -new -key ${SSL_DIR}/healthcheck-client.key -out ${SSL_DIR}/etcd-cli
 openssl x509 -req -in ${SSL_DIR}/etcd-client.csr -CA ${SSL_DIR}/ca.crt -CAkey ${SSL_DIR}/ca.key -CAcreateserial -out ${SSL_DIR}/healthcheck-client.crt -days 365 -sha256 -extensions req_ext -extfile etcd-client-csr.conf
 
 echo "모든 인증서가 생성되었습니다."
+
+
+
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/shell/kubernetes/generate-etcd-certs.sh -o generate-etcd-certs.sh
+# chmod +x generate-etcd-certs.sh
