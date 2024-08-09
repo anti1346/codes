@@ -17,7 +17,8 @@ generate_etcd_config() {
   local NODE_NAME=$1
   local NODE_IP=$2
 
-  cat <<EOF | sudo tee ${NODE_NAME}.conf > /dev/null
+  #cat <<EOF | sudo tee ${NODE_NAME}.conf > /dev/null
+  cat <<EOF | sudo tee ${NODE_NAME}.conf
 ETCD_NAME="${NODE_NAME}"
 ETCD_DATA_DIR="${ETCD_DATA}"
 ETCD_LISTEN_PEER_URLS="https://${NODE_IP}:2380"
@@ -39,8 +40,8 @@ ETCD_PEER_KEY_FILE="${ETCD_CERT_DIR}/peer.key"
 ETCD_PEER_CLIENT_CERT_AUTH="true"
 EOF
 
-  echo -e "###########################################################\n"
-  echo -e "/etc/default/etcd\n"
+  echo -e "\n###########################################################"
+  echo -e "/etc/default/etcd"
   echo -e "###########################################################\n"
 }
 
