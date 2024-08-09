@@ -16,12 +16,14 @@ ORGANIZATION="SangChul Blog"
 ORGANIZATIONAL_UNIT="IT Department"
 COMMON_NAME="etcd"
 
+CRS_DIR="/tmp/crs"
 SSL_DIR="/etc/kubernetes/pki/etcd"
 CA_CERT_DAYS=3650
 CERT_DAYS=365
 KEY_BITS=2048
 
 # Create directories for storing certificates
+mkdir -p ${CRS_DIR}
 mkdir -p ${SSL_DIR}
 
 generate_csr_conf() {
@@ -66,20 +68,20 @@ openssl req -x509 -new -nodes -key ${SSL_DIR}/ca.key -sha256 -days ${CA_CERT_DAY
 
 create_cert() {
     local name=$1
-    local config_file=${SSL_DIR}/etcd-${name}-csr.conf
+    local config_file=${CRS_DIR}/etcd-${name}-csr.conf
 
     # 개인 키 생성
     openssl genpkey -algorithm RSA -out ${SSL_DIR}/${name}.key -pkeyopt rsa_keygen_bits:${KEY_BITS}
 
     # CSR 구성 파일 생성 및 CSR 생성
     generate_csr_conf ${name} > ${config_file}
-    openssl req -new -key ${SSL_DIR}/${name}.key -out ${SSL_DIR}/etcd-${name}.csr -config ${config_file}
+    openssl req -new -key ${SSL_DIR}/${name}.key -out ${CRS_DIR}/etcd-${name}.csr -config ${config_file}
 
     # 인증서 생성
-    openssl x509 -req -in ${SSL_DIR}/etcd-${name}.csr -CA ${SSL_DIR}/ca.crt -CAkey ${SSL_DIR}/ca.key -CAcreateserial -out ${SSL_DIR}/${name}.crt -days ${CERT_DAYS} -sha256 -extensions req_ext -extfile ${config_file}
+    openssl x509 -req -in ${CRS_DIR}/etcd-${name}.csr -CA ${SSL_DIR}/ca.crt -CAkey ${SSL_DIR}/ca.key -CAcreateserial -out ${SSL_DIR}/${name}.crt -days ${CERT_DAYS} -sha256 -extensions req_ext -extfile ${config_file}
 
     # CSR 파일 삭제 (선택 사항)
-    rm -f ${SSL_DIR}/etcd-${name}.csr
+    rm -f ${CRS_DIR}/etcd-${name}.csr
 
     # KEY, CRT 파일 권한 설정
     chmod 600 ${SSL_DIR}/*.key
