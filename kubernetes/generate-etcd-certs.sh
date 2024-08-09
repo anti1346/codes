@@ -68,25 +68,25 @@ openssl genpkey -algorithm RSA -out ${SSL_DIR}/ca.key -pkeyopt rsa_keygen_bits:$
 openssl req -x509 -new -nodes -key ${SSL_DIR}/ca.key -sha256 -days ${CA_CERT_DAYS} -out ${SSL_DIR}/ca.crt -subj "/CN=etcd-ca/O=${ORGANIZATION}/OU=${ORGANIZATIONAL_UNIT}"
 
 create_cert() {
-    local name=$1
-    local config_file=${CSR_DIR}/etcd-${name}-csr.conf
+  local name=$1
+  local config_file=${CSR_DIR}/etcd-${name}-csr.conf
 
-    # 개인 키 생성
-    openssl genpkey -algorithm RSA -out ${SSL_DIR}/${name}.key -pkeyopt rsa_keygen_bits:${KEY_BITS}
+  # 개인 키 생성
+  openssl genpkey -algorithm RSA -out ${SSL_DIR}/${name}.key -pkeyopt rsa_keygen_bits:${KEY_BITS}
 
-    # CSR 구성 파일 생성 및 CSR 생성
-    generate_csr_conf ${name} > ${config_file}
-    openssl req -new -key ${SSL_DIR}/${name}.key -out ${CSR_DIR}/etcd-${name}.csr -config ${config_file}
+  # CSR 구성 파일 생성 및 CSR 생성
+  generate_csr_conf ${name} > ${config_file}
+  openssl req -new -key ${SSL_DIR}/${name}.key -out ${CSR_DIR}/etcd-${name}.csr -config ${config_file}
 
-    # 인증서 생성
-    openssl x509 -req -in ${CSR_DIR}/etcd-${name}.csr -CA ${SSL_DIR}/ca.crt -CAkey ${SSL_DIR}/ca.key -CAcreateserial -out ${SSL_DIR}/${name}.crt -days ${CERT_DAYS} -sha256 -extensions req_ext -extfile ${config_file}
+  # 인증서 생성
+  openssl x509 -req -in ${CSR_DIR}/etcd-${name}.csr -CA ${SSL_DIR}/ca.crt -CAkey ${SSL_DIR}/ca.key -CAcreateserial -out ${SSL_DIR}/${name}.crt -days ${CERT_DAYS} -sha256 -extensions req_ext -extfile ${config_file}
 
-    # CSR 파일 삭제 (선택 사항)
-    rm -f ${CSR_DIR}/etcd-${name}.csr
+  # CSR 파일 삭제 (선택 사항)
+  rm -f ${CSR_DIR}/etcd-${name}.csr
 
-    # KEY, CRT 파일 권한 설정
-    chmod 600 ${SSL_DIR}/*.key
-    chmod 644 ${SSL_DIR}/*.crt
+  # KEY, CRT 파일 권한 설정
+  chmod 600 ${SSL_DIR}/*.key
+  chmod 644 ${SSL_DIR}/*.crt
 }
 
 # 2. etcd 서버 인증서 생성
