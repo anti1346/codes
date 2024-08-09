@@ -11,11 +11,13 @@ apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
 localAPIEndpoint:
   advertiseAddress: ${K8S_API_SERVER_IP}
+  bindPort: 6443
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
+controlPlaneEndpoint: "${K8S_API_SERVER_IP}:6443"
 networking:
-  podSubnet: "192.168.0.0/16"
+  podSubnet: "10.244.0.0/16"
 etcd:
   external:
     endpoints:
@@ -25,7 +27,7 @@ etcd:
     keyFile: /etc/etcd/ssl/peer.key
 EOF
 
-echo "sudo kubeadm init --config kubeadmcfg.yaml --upload-certs"
+echo "sudo kubeadm init --config kubeadmcfg.yaml --upload-certs | tee $HOME/kubeadm_init_output.log"
 
 
 
