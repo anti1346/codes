@@ -2,12 +2,13 @@
 
 set -e
 
-NAME1="node111"
-NAME2="node112"
-NAME3="node113"
-ADDRESS1="192.168.10.111"
-ADDRESS2="192.168.10.112"
-ADDRESS3="192.168.10.113"
+# .env 파일 로드
+if [ -f ./config.env ]; then
+  export $(cat ./config.env | xargs)
+else
+  echo "config.env 파일을 찾을 수 없습니다. 스크립트를 종료합니다."
+  exit 1
+fi
 
 COUNTRY="KR"
 STATE="Seoul"
@@ -49,13 +50,13 @@ subjectAltName = @alt_names
 
 [ alt_names ]
 DNS.1   = localhost
-DNS.2   = ${NAME1}
-DNS.3   = ${NAME2}
-DNS.4   = ${NAME3}
+DNS.2   = ${ETCD_NODE_1_HOSTNAME}
+DNS.3   = ${ETCD_NODE_2_HOSTNAME}
+DNS.4   = ${ETCD_NODE_3_HOSTNAME}
 IP.1    = 127.0.0.1
-IP.2    = ${ADDRESS1}
-IP.3    = ${ADDRESS2}
-IP.4    = ${ADDRESS3}
+IP.2    = ${ETCD_NODE_1_IP}
+IP.3    = ${ETCD_NODE_2_IP}
+IP.4    = ${ETCD_NODE_3_IP}
 EOF
 }
 
