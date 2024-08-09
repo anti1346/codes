@@ -49,6 +49,6 @@ echo "etcd 설정 파일이 모두 생성되었습니다."
 
 
 
-# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/generate-etcd-config.sh -o generate-etcd-certs.sh
-# chmod +x generate-etcd-certs.sh
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/generate-etcd-config.sh -o generate-etcd-config.sh
+# chmod +x generate-etcd-config.sh
 
