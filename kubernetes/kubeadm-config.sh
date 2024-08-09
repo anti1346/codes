@@ -11,10 +11,6 @@ ETCD_NODE3_IP="192.168.0.111"
 cat << EOF > kubeadmcfg.yaml
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
-kind: InitConfiguration
-localAPIEndpoint:
-  advertiseAddress: ${MASTER_NODE_IP}
-  bindPort: 6443
 bootstrapTokens:
 - groups:
   - system:bootstrappers:kubeadm:default-node-token
@@ -23,8 +19,22 @@ bootstrapTokens:
   usages:
   - signing
   - authentication
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: ${MASTER_NODE_IP}
+  bindPort: 6443
+nodeRegistration:
+  criSocket: unix:///var/run/containerd/containerd.sock
+  imagePullPolicy: IfNotPresent
+  name: node
+  taints: null
 ---
+apiServer:
+  timeoutForControlPlane: 4m0s
 apiVersion: kubeadm.k8s.io/v1beta3
+certificatesDir: /etc/kubernetes/pki
+clusterName: kubernetes
+controllerManager: {}
 kind: ClusterConfiguration
 kubernetesVersion: 1.27.0
 controlPlaneEndpoint: "${LOAD_BALANCER_DNS}:2379"
@@ -32,6 +42,7 @@ networking:
   dnsDomain: cluster.local
   serviceSubnet: 10.96.0.0/12
   podSubnet: 192.168.0.0/16
+dns: {}
 etcd:
   external:
     endpoints:
@@ -41,6 +52,7 @@ etcd:
     caFile: /etc/kubernetes/pki/etcd/ca.crt
     certFile: /etc/kubernetes/pki/etcd/peer.crt
     keyFile: /etc/kubernetes/pki/etcd/peer.key
+scheduler: {}
 EOF
 
 
