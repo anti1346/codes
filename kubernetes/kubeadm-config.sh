@@ -56,6 +56,6 @@ kubeadm init --config kubeadm-config.yaml
 
 
 
-# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/shell/kubernetes/kubeadm-config.sh -o kubeadm-config.sh
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/kubeadm-config.sh -o kubeadm-config.sh
 # chmod +x kubeadm-config.sh
 

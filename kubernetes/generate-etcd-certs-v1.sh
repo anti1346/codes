@@ -155,6 +155,6 @@ echo "모든 인증서가 생성되었습니다."
 
 
 
-# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/shell/kubernetes/generate-etcd-certs.sh -o generate-etcd-certs.sh
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/generate-etcd-certs.sh -o generate-etcd-certs.sh
 # chmod +x generate-etcd-certs.sh
 
