@@ -1,13 +1,8 @@
 #!/bin/bash
 
 # 환경 변수 설정
-# .env 파일 로드
-if [ -f ./config.env ]; then
-  export $(grep -v '^#' config.env | xargs -d '\n')
-else
-  echo "config.env 파일을 찾을 수 없습니다. 스크립트를 종료합니다."
-  exit 1
-fi
+LOAD_BALANCER_PUBLIC_IP="192.168.10.111"
+K8S_API_SERVER_IP="192.168.10.111"
 
 # kubeadm 설정 파일 생성
 cat << EOF > kubeadmcfg.yaml
