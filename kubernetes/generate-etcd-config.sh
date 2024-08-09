@@ -4,7 +4,7 @@ set -e
 
 # .env 파일 로드
 if [ -f ./config.env ]; then
-  export $(grep -v '^#' config.env | xargs -d '\n')
+  source ./config.env
 else
   echo "config.env 파일을 찾을 수 없습니다. 스크립트를 종료합니다."
   exit 1
@@ -17,8 +17,7 @@ generate_etcd_config() {
   local NODE_NAME=$1
   local NODE_IP=$2
 
-  #cat <<EOF | sudo tee ${NODE_NAME}.conf > /dev/null
-  cat <<EOF | sudo tee ${NODE_NAME}.conf
+  sudo tee ${NODE_NAME}.conf > /dev/null <<EOF
 ETCD_NAME="${NODE_NAME}"
 ETCD_DATA_DIR="${ETCD_DATA}"
 ETCD_LISTEN_PEER_URLS="https://${NODE_IP}:2380"
@@ -40,9 +39,7 @@ ETCD_PEER_KEY_FILE="${ETCD_CERT_DIR}/peer.key"
 ETCD_PEER_CLIENT_CERT_AUTH="true"
 EOF
 
-  echo -e "\n###########################################################"
-  echo -e "/etc/default/etcd"
-  echo -e "###########################################################\n"
+  echo "Configuration for ${NODE_NAME}.conf has been created at /etc/default/etcd"
 }
 
 # 각 노드에 대해 설정 파일 생성
