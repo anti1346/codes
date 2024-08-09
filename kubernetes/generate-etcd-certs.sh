@@ -2,13 +2,13 @@
 
 set -e
 
-.env 파일 로드
-if [ -f ./config.env ]; then
-  source ./config.env
-else
-  echo "config.env 파일을 찾을 수 없습니다. 스크립트를 종료합니다."
-  exit 1
-fi
+# 환경 변수 설정
+ETCD_NODE_1_HOSTNAME="node111"
+ETCD_NODE_2_HOSTNAME="node112"
+ETCD_NODE_3_HOSTNAME="node113"
+ETCD_NODE_1_IP="192.168.10.111"
+ETCD_NODE_2_IP="192.168.10.112"
+ETCD_NODE_3_IP="192.168.10.113"
 
 COUNTRY="KR"
 STATE="Seoul"
