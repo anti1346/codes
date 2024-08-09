@@ -3,7 +3,7 @@
 # 환경 변수 설정
 # .env 파일 로드
 if [ -f ./config.env ]; then
-  export $(cat ./config.env | xargs)
+  export $(grep -v '^#' config.env | xargs)
 else
   echo "config.env 파일을 찾을 수 없습니다. 스크립트를 종료합니다."
   exit 1
