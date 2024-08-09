@@ -2,9 +2,9 @@
 
 set -e
 
-# .env 파일 로드
+.env 파일 로드
 if [ -f ./config.env ]; then
-  export $(grep -v '^#' config.env | xargs -d '\n')
+  source ./config.env
 else
   echo "config.env 파일을 찾을 수 없습니다. 스크립트를 종료합니다."
   exit 1
