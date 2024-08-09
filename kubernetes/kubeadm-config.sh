@@ -2,6 +2,7 @@
 
 # 환경 변수 설정
 LOAD_BALANCER_DNS="192.168.0.130"
+MASTER_NODE_IP="192.168.0.131"
 
 # kubeadm 설정 파일 생성
 cat << EOF > kubeadmcfg.yaml
@@ -23,6 +24,8 @@ etcd:
     certFile: /etc/etcd/ssl/peer.crt
     keyFile: /etc/etcd/ssl/peer.key
 EOF
+
+echo "sudo kubeadm init --config kubeadmcfg.yaml --upload-certs"
 
 
 
