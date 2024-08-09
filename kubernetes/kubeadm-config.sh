@@ -1,8 +1,13 @@
 #!/bin/bash
 
 # 환경 변수 설정
-LOAD_BALANCER_DNS="192.168.0.130"
-MASTER_NODE_IP="192.168.0.131"
+# .env 파일 로드
+if [ -f ./config.env ]; then
+  export $(cat ./config.env | xargs)
+else
+  echo "config.env 파일을 찾을 수 없습니다. 스크립트를 종료합니다."
+  exit 1
+fi
 
 # kubeadm 설정 파일 생성
 cat << EOF > kubeadmcfg.yaml
@@ -10,7 +15,7 @@ cat << EOF > kubeadmcfg.yaml
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
 localAPIEndpoint:
-  advertiseAddress: ${LOAD_BALANCER_DNS}
+  advertiseAddress: ${K8S_API_SERVER_IP}
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
@@ -19,7 +24,7 @@ networking:
 etcd:
   external:
     endpoints:
-    - https://${LOAD_BALANCER_DNS}:2379
+    - https://${LOAD_BALANCER_PUBLIC_IP}:2379
     caFile: /etc/etcd/ssl/ca.crt
     certFile: /etc/etcd/ssl/peer.crt
     keyFile: /etc/etcd/ssl/peer.key
