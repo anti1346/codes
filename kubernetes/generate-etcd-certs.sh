@@ -16,8 +16,8 @@ ORGANIZATION="SangChul Blog"
 ORGANIZATIONAL_UNIT="IT Department"
 COMMON_NAME="etcd"
 
-CSR_DIR="/tmp/csr"
-SSL_DIR="/etc/kubernetes/pki/etcd"
+CSR_DIR="csr"
+SSL_DIR="ssl"
 CA_CERT_DAYS=3650
 CERT_DAYS=3650
 KEY_BITS=2048
