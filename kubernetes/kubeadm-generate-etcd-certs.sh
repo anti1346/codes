@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#!/bin/bash
-
 # 환경 변수 설정
 ETCD_NODE_1_HOSTNAME="node111"
 ETCD_NODE_2_HOSTNAME="node112"
