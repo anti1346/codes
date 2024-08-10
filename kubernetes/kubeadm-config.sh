@@ -1,33 +1,51 @@
 #!/bin/bash
 
-# 환경 변수 설정
-LOAD_BALANCER_PUBLIC_IP="192.168.10.111"
-K8S_API_SERVER_IP="192.168.10.111"
+# Define etcd node hostnames and IP addresses with consistent naming
+ETCD_NODE_1_HOSTNAME="etcd-node-1"
+ETCD_NODE_2_HOSTNAME="etcd-node-2"
+ETCD_NODE_3_HOSTNAME="etcd-node-3"
 
-# kubeadm 설정 파일 생성
-cat << EOF > kubeadmcfg.yaml
----
-apiVersion: kubeadm.k8s.io/v1beta3
-kind: InitConfiguration
-localAPIEndpoint:
-  advertiseAddress: ${K8S_API_SERVER_IP}
-  bindPort: 6443
----
-apiVersion: kubeadm.k8s.io/v1beta3
+ETCD_NODE_1_IP="192.168.10.101"
+ETCD_NODE_2_IP="192.168.10.102"
+ETCD_NODE_3_IP="192.168.10.103"
+
+# Arrays to hold the hostnames and IP addresses
+NODE_HOSTNAMES=(${ETCD_NODE_1_HOSTNAME} ${ETCD_NODE_2_HOSTNAME} ${ETCD_NODE_3_HOSTNAME})
+NODE_IPS=(${ETCD_NODE_1_IP} ${ETCD_NODE_2_IP} ${ETCD_NODE_3_IP})
+
+# Create directories for each node
+for NODE_HOSTNAME in "${NODE_HOSTNAMES[@]}"; do
+    mkdir -p "/tmp/${NODE_HOSTNAME}/"
+done
+
+# Generate kubeadm configuration files for each node
+for i in "${!NODE_IPS[@]}"; do
+    HOSTNAME=${NODE_HOSTNAMES[$i]}
+    IP_ADDRESS=${NODE_IPS[$i]}
+    
+    cat << EOF > "/tmp/${HOSTNAME}/kubeadmcfg.yaml"
+apiVersion: "kubeadm.k8s.io/v1beta2"
 kind: ClusterConfiguration
-controlPlaneEndpoint: "${K8S_API_SERVER_IP}:6443"
-networking:
-  podSubnet: "10.244.0.0/16"
 etcd:
-  external:
-    endpoints:
-    - https://${LOAD_BALANCER_PUBLIC_IP}:2379
-    caFile: /etc/etcd/ssl/ca.crt
-    certFile: /etc/etcd/ssl/peer.crt
-    keyFile: /etc/etcd/ssl/peer.key
+    local:
+        serverCertSANs:
+        - "${IP_ADDRESS}"
+        peerCertSANs:
+        - "${IP_ADDRESS}"
+        extraArgs:
+            initial-cluster: ${NODE_HOSTNAMES[0]}=https://${NODE_IPS[0]}:2380,${NODE_HOSTNAMES[1]}=https://${NODE_IPS[1]}:2380,${NODE_HOSTNAMES[2]}=https://${NODE_IPS[2]}:2380
+            initial-cluster-state: new
+            name: ${HOSTNAME}
+            listen-peer-urls: https://${IP_ADDRESS}:2380
+            listen-client-urls: https://${IP_ADDRESS}:2379
+            advertise-client-urls: https://${IP_ADDRESS}:2379
+            initial-advertise-peer-urls: https://${IP_ADDRESS}:2380
 EOF
 
-echo "sudo kubeadm init --config kubeadmcfg.yaml --upload-certs | tee $HOME/kubeadm_init_output.log"
+done
+
+echo "kubeadm init phase certs etcd-ca"
+#echo "sudo kubeadm init --config kubeadmcfg.yaml --upload-certs | tee $HOME/kubeadm_init_output.log"
 
 
 
