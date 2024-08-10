@@ -46,6 +46,6 @@ echo "인증서 생성 및 정리가 성공적으로 완료되었습니다."
 
 
 
-# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/generate-etcd-certs.sh -o generate-etcd-certs.sh
-# chmod +x generate-etcd-certs.sh
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/kubeadm-generate-etcd-certs.sh -o kubeadm-generate-etcd-certs.sh
+# chmod +x kubeadm-generate-etcd-certs.sh
 
