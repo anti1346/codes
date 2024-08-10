@@ -8,26 +8,26 @@ ETCD_NODE_1_IP="192.168.10.111"
 ETCD_NODE_2_IP="192.168.10.112"
 ETCD_NODE_3_IP="192.168.10.113"
 
-WORKDIR="kubernetes_work_directory"
+WORKDIR="$HOME/kubernetes_work_directory"
 
-mkdir -p "$HOME/$WORKDIR"
-cd "$HOME/$WORKDIR"
+mkdir -p "$WORKDIR"
+cd "$WORKDIR"
 
-# Arrays to hold the hostnames and IP addresses
+# 호스트 이름과 IP 주소를 보유하는 배열
 NODE_HOSTNAMES=(${ETCD_NODE_1_HOSTNAME} ${ETCD_NODE_2_HOSTNAME} ${ETCD_NODE_3_HOSTNAME})
 NODE_IPS=(${ETCD_NODE_1_IP} ${ETCD_NODE_2_IP} ${ETCD_NODE_3_IP})
 
-# Create directories for each node
+# 각 노드에 대한 디렉터리 생성
 for NODE_HOSTNAME in "${NODE_HOSTNAMES[@]}"; do
-    mkdir -p "tmp/${NODE_HOSTNAME}/"
+    mkdir -p "${WORKDIR}/tmp/${NODE_HOSTNAME}/"
 done
 
-# Generate kubeadm configuration files for each node
+# 각 노드에 대한 kubeadm 구성 파일 생성
 for i in "${!NODE_IPS[@]}"; do
     HOSTNAME=${NODE_HOSTNAMES[$i]}
     IP_ADDRESS=${NODE_IPS[$i]}
     
-    cat << EOF > "tmp/${HOSTNAME}/kubeadmcfg.yaml"
+    cat << EOF > "${WORKDIR}/tmp/${HOSTNAME}/kubeadmcfg.yaml"
 apiVersion: "kubeadm.k8s.io/v1beta2"
 kind: ClusterConfiguration
 etcd:
