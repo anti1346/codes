@@ -14,7 +14,7 @@ NODE_IPS=(${ETCD_NODE_1_IP} ${ETCD_NODE_2_IP} ${ETCD_NODE_3_IP})
 
 # Create directories for each node
 for NODE_HOSTNAME in "${NODE_HOSTNAMES[@]}"; do
-    mkdir -p "/tmp/${NODE_HOSTNAME}/"
+    mkdir -p "tmp/${NODE_HOSTNAME}/"
 done
 
 # Generate kubeadm configuration files for each node
@@ -22,7 +22,7 @@ for i in "${!NODE_IPS[@]}"; do
     HOSTNAME=${NODE_HOSTNAMES[$i]}
     IP_ADDRESS=${NODE_IPS[$i]}
     
-    cat << EOF > "/tmp/${HOSTNAME}/kubeadmcfg.yaml"
+    cat << EOF > "tmp/${HOSTNAME}/kubeadmcfg.yaml"
 apiVersion: "kubeadm.k8s.io/v1beta2"
 kind: ClusterConfiguration
 etcd:
