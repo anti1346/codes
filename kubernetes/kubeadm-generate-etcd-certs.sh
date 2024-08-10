@@ -15,7 +15,7 @@ cd "$WORKDIR"
 
 NODE_HOSTNAMES=(${ETCD_NODE_1_HOSTNAME} ${ETCD_NODE_2_HOSTNAME} ${ETCD_NODE_3_HOSTNAME})
 
-# 주어진 노드에 대한 etcd 인증서를 생성하는 함수
+# 특정 노드에 대한 etcd 인증서를 생성하는 기능
 generate_etcd_certs() {
     local NODE=$1
     echo "Generating certificates for ${NODE}..."
@@ -39,7 +39,7 @@ for NODE in "${NODE_HOSTNAMES[@]}"; do
     generate_etcd_certs ${NODE}
 done
 
-# 보조 노드에서 민감한 파일 정리
+# 보조 노드에서 중요한 파일 정리
 for NODE in "${NODE_HOSTNAMES[@]:1}"; do
     echo "Deleting ca.key from ${WORKDIR}/tmp/${NODE}..."
     find "${WORKDIR}/tmp/${NODE}" -name ca.key -type f -delete
