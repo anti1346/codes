@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# Define etcd node hostnames and IP addresses with consistent naming
-ETCD_NODE_1_HOSTNAME="etcd-node-1"
-ETCD_NODE_2_HOSTNAME="etcd-node-2"
-ETCD_NODE_3_HOSTNAME="etcd-node-3"
-
-ETCD_NODE_1_IP="192.168.10.101"
-ETCD_NODE_2_IP="192.168.10.102"
-ETCD_NODE_3_IP="192.168.10.103"
+# 환경 변수 설정
+ETCD_NODE_1_HOSTNAME="node111"
+ETCD_NODE_2_HOSTNAME="node112"
+ETCD_NODE_3_HOSTNAME="node113"
+ETCD_NODE_1_IP="192.168.10.111"
+ETCD_NODE_2_IP="192.168.10.112"
+ETCD_NODE_3_IP="192.168.10.113"
 
 # Arrays to hold the hostnames and IP addresses
 NODE_HOSTNAMES=(${ETCD_NODE_1_HOSTNAME} ${ETCD_NODE_2_HOSTNAME} ${ETCD_NODE_3_HOSTNAME})
