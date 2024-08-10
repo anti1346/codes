@@ -1,12 +1,22 @@
 #!/bin/bash
 
 # 환경 변수 설정
+ETCD_ENDPOINT_IP="192.168.10.111"
+K8S_API_SERVER_IP="192.168.10.111"
+
 ETCD_NODE_1_HOSTNAME="node111"
 ETCD_NODE_2_HOSTNAME="node112"
 ETCD_NODE_3_HOSTNAME="node113"
 ETCD_NODE_1_IP="192.168.10.111"
 ETCD_NODE_2_IP="192.168.10.112"
 ETCD_NODE_3_IP="192.168.10.113"
+
+K8S_NODE_1_HOSTNAME="node111"
+K8S_NODE_2_HOSTNAME="node112"
+K8S_NODE_3_HOSTNAME="node113"
+K8S_NODE_1_IP="192.168.10.111"
+K8S_NODE_2_IP="192.168.10.112"
+K8S_NODE_3_IP="192.168.10.113"
 
 WORKDIR="$HOME/kubernetes_work_directory"
 
@@ -28,22 +38,24 @@ for i in "${!NODE_IPS[@]}"; do
     IP_ADDRESS=${NODE_IPS[$i]}
     
     cat << EOF > "${WORKDIR}/tmp/${HOSTNAME}/kubeadmcfg.yaml"
-apiVersion: "kubeadm.k8s.io/v1beta2"
+---
+apiVersion: "kubeadm.k8s.io/v1beta3"
+kind: InitConfiguration
+localAPIEndpoint:
+    advertiseAddress: ${K8S_API_SERVER_IP}
+    bindPort: 6443
+---
+apiVersion: "kubeadm.k8s.io/v1beta3"
 kind: ClusterConfiguration
+networking:
+    podSubnet: "10.244.0.0/16"
 etcd:
-    local:
-        serverCertSANs:
-        - "${IP_ADDRESS}"
-        peerCertSANs:
-        - "${IP_ADDRESS}"
-        extraArgs:
-            initial-cluster: ${NODE_HOSTNAMES[0]}=https://${NODE_IPS[0]}:2380,${NODE_HOSTNAMES[1]}=https://${NODE_IPS[1]}:2380,${NODE_HOSTNAMES[2]}=https://${NODE_IPS[2]}:2380
-            initial-cluster-state: new
-            name: ${HOSTNAME}
-            listen-peer-urls: https://${IP_ADDRESS}:2380
-            listen-client-urls: https://${IP_ADDRESS}:2379
-            advertise-client-urls: https://${IP_ADDRESS}:2379
-            initial-advertise-peer-urls: https://${IP_ADDRESS}:2380
+    external:
+        endpoints:
+            - https://${ETCD_ENDPOIN_IP}:2379
+        caFile: /etc/etcd/ssl/ca.crt
+        certFile: /etc/etcd/ssl/peer.crt
+        keyFile: /etc/etcd/ssl/peer.key
 EOF
 
 done
