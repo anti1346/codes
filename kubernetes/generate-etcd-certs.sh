@@ -14,7 +14,7 @@ COUNTRY="KR"
 STATE="Seoul"
 LOCALITY="Jongno-gu"
 ORGANIZATION="SangChul Blog"
-ORGANIZATIONAL_UNIT="IT Department"
+ORGANIZATIONAL_UNIT="Infrastructure Team"
 COMMON_NAME="etcd"
 
 CSR_DIR="csr"
