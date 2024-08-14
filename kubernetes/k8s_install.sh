@@ -22,10 +22,10 @@ echo "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/
 
 sudo apt-get update
 sudo apt-get install -y containerd.io
+sudo systemctl enable --now containerd
 sudo mkdir -p /etc/containerd
 sudo containerd config default | sudo tee /etc/containerd/config.toml
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
-sudo systemctl enable --now containerd
 sudo systemctl restart containerd
 
 # Kubernetes APT 저장소 설정
