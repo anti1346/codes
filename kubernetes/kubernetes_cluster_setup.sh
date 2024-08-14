@@ -124,6 +124,5 @@ esac
 
 
 
-# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/setup_kubernetes_cluster.sh -o setup_kubernetes_cluster.sh
-# chmod +x setup_kubernetes_cluster.sh
-
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/kubernetes_cluster_setup.sh -o kubernetes_cluster_setup.sh
+# chmod +x kubernetes_cluster_setup.sh
