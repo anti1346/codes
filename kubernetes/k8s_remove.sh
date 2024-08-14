@@ -68,3 +68,9 @@ sudo rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 sudo apt-get clean
 
 echo "Kubernetes 및 containerd가 성공적으로 제거되었습니다."
+
+
+
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/k8s_remove.sh -o k8s_remove.sh
+# chmod +x k8s_remove.sh
+# bash k8s_remove.sh

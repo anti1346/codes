@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 에러 발생 시 스크립트 중단
-set -e
+# set -e
 
 # 쿠버네티스 버전 설정
 KUBERNETES_VERSION="v1.30"
@@ -37,3 +37,9 @@ sudo apt-mark hold kubelet kubeadm kubectl
 sudo systemctl enable --now kubelet
 
 echo "Kubernetes 및 Containerd 설치가 완료되었습니다."
+
+
+
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/k8s_install.sh -o k8s_install.sh
+# chmod +x k8s_install.sh
+# bash k8s_install.sh
