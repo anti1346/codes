@@ -16,7 +16,8 @@ sudo apt-get update
 sudo apt-get install -y gnupg2 software-properties-common apt-transport-https ca-certificates lsb-release curl
 
 # Containerd 설치
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/docker.gpg
+sudo rm -f /etc/apt/trusted.gpg.d/docker.gpg
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -y -o /etc/apt/trusted.gpg.d/docker.gpg
 echo "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list
 
 sudo apt-get update
@@ -28,6 +29,7 @@ sudo systemctl enable --now containerd
 sudo systemctl restart containerd
 
 # Kubernetes APT 저장소 설정
+sudo rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 curl -fsSL https://pkgs.k8s.io/core:/stable:/${KUBERNETES_VERSION}/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/${KUBERNETES_VERSION}/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
