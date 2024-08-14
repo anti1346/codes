@@ -37,6 +37,6 @@ fi
 
 
 
-# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/k8s_system_setup -o k8s_system_setup.sh
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/k8s_system_setup.sh -o k8s_system_setup.sh
 # chmod +x k8s_system_setup.sh
 # bash k8s_system_setup.sh
