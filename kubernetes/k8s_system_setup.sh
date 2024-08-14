@@ -34,3 +34,9 @@ if [[ "$reboot_choice" =~ ^[Yy]$ ]]; then
 else
     echo "스크립트가 완료되었습니다. 시스템이 재부팅되지 않았습니다."
 fi
+
+
+
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/main/kubernetes/k8s_system_setup -o k8s_system_setup.sh
+# chmod +x k8s_system_setup.sh
+# bash k8s_system_setup.sh
