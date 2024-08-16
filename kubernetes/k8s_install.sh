@@ -38,6 +38,16 @@ sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 sudo systemctl enable --now kubelet
 
+# kubectl 자동 완성 활성화를 위한 코드
+KUBE_COMPLETION="source <(kubectl completion bash)"
+# 이미 .bashrc에 해당 내용이 포함되어 있는지 확인
+if ! grep -q "$KUBE_COMPLETION" "$HOME/.bashrc"; then
+    echo "$KUBE_COMPLETION" >> "$HOME/.bashrc"
+    echo "kubectl completion added to .bashrc"
+else
+    echo "kubectl completion already exists in .bashrc"
+fi
+
 echo "Kubernetes 및 Containerd 설치가 완료되었습니다."
 
 
