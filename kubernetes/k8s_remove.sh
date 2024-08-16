@@ -54,6 +54,7 @@ sudo rm -rf /opt/cni
 sudo rm -rf /opt/containerd
 sudo rm -rf /var/lib/containerd
 sudo rm -rf /var/log/containers
+sudo rm -rf /var/log/calico
 
 # systemd 서비스 파일 삭제
 sudo rm -rf /etc/systemd/system/kubelet.service.d
@@ -63,6 +64,7 @@ sudo rm -rf /etc/systemd/system/containerd.service
 # Kubernetes APT 저장소 및 키 제거
 sudo rm -f /etc/apt/sources.list.d/kubernetes.list
 sudo rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+sudo rm -f /etc/apt/keyrings/kubernetes-archive-keyring.gpg
 
 # APT 캐시 정리
 sudo apt-get clean
