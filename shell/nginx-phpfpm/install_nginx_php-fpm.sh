@@ -65,7 +65,15 @@ install_php_fpm() {
 
     sudo mkdir -p /var/log/php-fpm
     
-    download_and_verify "$PHP_FPM_CONFIG_URL" "/etc/php/${PHP_VERSION}/fpm/php-fpm.conf"
+    sudo tee /etc/php/${PHP_VERSION}/fpm/php-fpm.conf > /dev/null << EOF
+include = /etc/php/${PHP_VERSION}/fpm/pool.d/*.conf
+
+[global]
+pid = /run/php/php-fpm.pid
+error_log = /var/log/php-fpm/php-fpm.log
+daemonize = yes
+EOF
+
     download_and_verify "$PHP_FPM_POOL_CONFIG_URL" "/etc/php/${PHP_VERSION}/fpm/pool.d/www.conf"
 
     sudo sed -i 's/expose_php = On/expose_php = Off/g' /etc/php/${PHP_VERSION}/cli/php.ini
