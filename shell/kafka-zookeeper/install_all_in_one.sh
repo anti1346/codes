@@ -81,6 +81,9 @@ install_zookeeper() {
     sudo mkdir -p "${ZOOKEEPER_HOME}/data"
     sudo chmod -R 755 "${ZOOKEEPER_HOME}/data"
     
+    # 각 노드에 고유한 ID 설정 (예: 1, 2, 3)
+    echo "1" > "${ZOOKEEPER_HOME}/data/myid"
+
     # Configure ZooKeeper settings
     sudo tee "${ZOOKEEPER_HOME}/conf/zoo.cfg" > /dev/null <<'EOF'
 tickTime=2000
