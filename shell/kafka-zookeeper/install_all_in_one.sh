@@ -39,6 +39,33 @@ install_kafka() {
     sudo tar -xf "${KAFKA_DOWNLOAD_FILE}.tgz" -C "${KAFKA_HOME}" --strip-components=1
     
     sudo mkdir -p "${KAFKA_HOME}/logs"
+
+    # Configure Kafka settings
+    sudo tee "${ZOOKEEPER_HOME}/conf/zoo.cfg" > /dev/null <<'EOF'
+# 각 브로커에 고유한 ID 설정 (예: 0, 1, 2)
+broker.id=0
+num.network.threads=3
+num.io.threads=8
+socket.send.buffer.bytes=102400
+socket.receive.buffer.bytes=102400
+socket.request.max.bytes=104857600
+log.dirs=${KAFKA_HOME}/logs
+# 파티션 수 설정
+num.partitions=3 
+num.recovery.threads.per.data.dir=1 
+# 오프셋 토픽의 복제 계수 설정 (브로커 수만큼 설정)
+offsets.topic.replication.factor=3
+# 기본 복제 계수
+default.replication.factor=3
+transaction.state.log.replication.factor=1
+transaction.state.log.min.isr=1
+log.retention.hours=168
+log.retention.check.interval.ms=300000
+# ZooKeeper 클러스터 정보
+zookeeper.connect=node1:2181,node2:2181,node3:2181
+zookeeper.connection.timeout.ms=18000
+group.initial.rebalance.delay.ms=0
+EOF
 }
 
 install_zookeeper() {
@@ -59,12 +86,16 @@ install_zookeeper() {
 tickTime=2000
 initLimit=10
 syncLimit=5
+
 dataDir=${ZOOKEEPER_HOME}/data
+
 clientPortAddress=0.0.0.0
 clientPort=2181
+
 maxClientCnxns=50
 minSessionTimeout=2000
 maxSessionTimeout=10000
+
 server.1=node1:2888:3888
 server.2=node2:2888:3888
 server.3=node3:2888:3888
