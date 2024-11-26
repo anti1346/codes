@@ -1,13 +1,16 @@
 #!/bin/bash
 
-# 입력 인자: FILE_SIZE (파일 크기), SPEED (전송 속도)
-FILE_SIZE=$1
-SPEED=$2
-UNIT=$3  # 파일 크기 단위 (GB, MB)
+# 입력값 처리
+FILE_SIZE_WITH_UNIT=$1
+SPEED_WITH_UNIT=$2
 
-# 단위에서 숫자만 추출하는 함수
-get_number() {
-    echo $1 | sed 's/[^0-9.]//g'
+# 단위가 포함된 값을 분리하는 함수
+extract_value() {
+    echo $1 | sed 's/[^0-9.]//g'  # 숫자와 소수점을 추출
+}
+
+extract_unit() {
+    echo $1 | sed 's/[0-9.]//g'  # 숫자를 제외한 부분 추출
 }
 
 # 단위 변환 함수
@@ -27,28 +30,18 @@ convert() {
 }
 
 # 파일 크기와 전송 속도에서 숫자와 단위를 분리
-FILE_SIZE_NUM=$(get_number $FILE_SIZE)
-SPEED_NUM=$(get_number $SPEED)
-FILE_SIZE_UNIT=$(echo $FILE_SIZE | sed 's/[0-9]*//g')
-SPEED_UNIT=$(echo $SPEED | sed 's/[0-9]*//g')
+FILE_SIZE=$(extract_value $FILE_SIZE_WITH_UNIT)
+SPEED=$(extract_value $SPEED_WITH_UNIT)
 
-# 단위가 맞는지 확인
-if [[ "$FILE_SIZE_UNIT" != "GB" && "$FILE_SIZE_UNIT" != "MB" ]]; then
-    echo "Invalid file size unit. Use 'GB' or 'MB'."
-    exit 1
-fi
+FILE_UNIT=$(extract_unit $FILE_SIZE_WITH_UNIT)
+SPEED_UNIT=$(extract_unit $SPEED_WITH_UNIT)
 
-if [[ "$SPEED_UNIT" != "GB" && "$SPEED_UNIT" != "MB" ]]; then
-    echo "Invalid speed unit. Use 'GB' or 'MB'."
-    exit 1
-fi
-
-# 파일 크기와 전송 속도를 바이트로 변환
-FILE_SIZE_IN_BYTES=$(convert $FILE_SIZE_UNIT)
+# 단위 변환
+FILE_SIZE_IN_BYTES=$(convert $FILE_UNIT)
 SPEED_IN_BYTES=$(convert $SPEED_UNIT)
 
 # 전송 시간 계산
-TRANSFER_TIME=$(echo "scale=2; $FILE_SIZE_NUM * $FILE_SIZE_IN_BYTES / ($SPEED_NUM * $SPEED_IN_BYTES)" | bc)
+TRANSFER_TIME=$(echo "scale=2; $FILE_SIZE * $FILE_SIZE_IN_BYTES / ($SPEED * $SPEED_IN_BYTES)" | bc)
 
 # 결과 출력
 echo "Transfer time: $TRANSFER_TIME seconds"
