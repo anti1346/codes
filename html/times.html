@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Time Selector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            margin: 20px 0;
+            color: #333;
+        }
+        .utc-time {
+            font-size: 1.5em;
+            color: #007bff;
+            margin-top: 10px;
+        }
+        select {
+            padding: 10px;
+            font-size: 1em;
+            margin: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .time-display {
+            margin-top: 30px;
+            font-size: 1.5em;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>World Time Viewer</h1>
+    <div class="utc-time" id="utc-time">Loading UTC Time...</div>
+
+    <h2>Select a Country to View Local Time</h2>
+    <select id="country-selector">
+        <option value="" disabled selected>Select a country</option>
+        <option value="America/New_York|en-US">United States (English)</option>
+        <option value="Europe/London|en-GB">United Kingdom (English)</option>
+        <option value="Europe/Paris|fr-FR">France (French)</option>
+        <option value="Asia/Tokyo|ja-JP">Japan (Japanese)</option>
+        <option value="Asia/Seoul|ko-KR">South Korea (Korean)</option>
+        <option value="Australia/Sydney|en-AU">Australia (English)</option>
+        <option value="Asia/Dubai|ar-AE">United Arab Emirates (Arabic)</option>
+    </select>
+
+    <div class="time-display" id="time-display">Please select a country.</div>
+
+    <script>
+        const utcTimeElement = document.getElementById("utc-time");
+        const selector = document.getElementById("country-selector");
+        const display = document.getElementById("time-display");
+
+        // 상단 UTC 시간 업데이트
+        function updateUtcTime() {
+            const now = new Date();
+            const formatter = new Intl.DateTimeFormat("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                timeZone: "UTC",
+                timeZoneName: "short"
+            });
+            utcTimeElement.textContent = `UTC Time: ${formatter.format(now)}`;
+        }
+
+        // 선택된 국가의 지역 시간 업데이트
+        function updateLocalTime() {
+            const selectedValue = selector.value;
+            if (!selectedValue) return;
+
+            const [timezone, locale] = selectedValue.split("|");
+            const now = new Date();
+            const formatter = new Intl.DateTimeFormat(locale, {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                timeZone: timezone
+            });
+            display.textContent = `Local Time: ${formatter.format(now)}`;
+        }
+
+        // 초기화 및 이벤트 바인딩
+        selector.addEventListener("change", () => {
+            updateLocalTime();
+            setInterval(updateLocalTime, 1000); // 1초마다 로컬 시간 업데이트
+        });
+
+        // 1초마다 UTC 시간 업데이트
+        setInterval(updateUtcTime, 1000);
+        updateUtcTime();
+    </script>
+</body>
+</html>
