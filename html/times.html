@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Time Selector</title>
+    <title>World Time Viewer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,10 +16,23 @@
             margin: 20px 0;
             color: #333;
         }
-        .utc-time {
-            font-size: 1.5em;
+        .utc-time, .local-time {
+            font-size: 2em;
+            font-weight: bold;
             color: #007bff;
-            margin-top: 10px;
+            background: #ffffff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            margin: 20px auto;
+        }
+        .utc-time {
+            border: 2px solid #007bff;
+        }
+        .local-time {
+            border: 2px solid #28a745;
+            color: #28a745;
         }
         select {
             padding: 10px;
@@ -28,10 +41,8 @@
             border-radius: 5px;
             border: 1px solid #ddd;
         }
-        .time-display {
-            margin-top: 30px;
-            font-size: 1.5em;
-            color: #555;
+        .time-display-container {
+            margin-top: 40px;
         }
     </style>
 </head>
@@ -51,7 +62,9 @@
         <option value="Asia/Dubai|ar-AE">United Arab Emirates (Arabic)</option>
     </select>
 
-    <div class="time-display" id="time-display">Please select a country.</div>
+    <div class="time-display-container">
+        <div class="local-time" id="time-display">Please select a country.</div>
+    </div>
 
     <script>
         const utcTimeElement = document.getElementById("utc-time");
