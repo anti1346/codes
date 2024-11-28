@@ -40,10 +40,16 @@
             margin-top: 10px;
             background: #f9f9f9;
         }
+        .selector-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
         select {
             padding: 10px;
             font-size: 1em;
-            margin: 20px;
             border-radius: 5px;
             border: 1px solid #ddd;
         }
@@ -53,25 +59,29 @@
     </style>
 </head>
 <body>
+    <p data-ke-size="size16">&nbsp;</p>
+    <p data-ke-size="size16">&nbsp;</p>
     <h1>UTC Time:</h1>
     <div class="time-box utc-time" id="utc-time">Loading UTC Time...</div>
-
-    <h2>Select a Country to View Local Time</h2>
-    <select id="country-selector">
-        <option value="Asia/Seoul|ko-KR" selected>South Korea (Seoul)</option>
-        <option value="America/New_York|en-US">United States (New York / Virginia)</option>
-        <option value="America/Los_Angeles|en-US">United States (Los Angeles / Oregon)</option>
-        <option value="Asia/Singapore|en-SG">Singapore</option>
-        <option value="Asia/Tokyo|ja-JP">Japan</option>
-        <option value="Asia/Shanghai|zh-CN">China</option>
-        <option value="Asia/Manila|en-PH">Philippines</option>
-        <option value="Europe/London|en-GB">United Kingdom</option>
-        <option value="Europe/Paris|fr-FR">France</option>
-        <option value="Australia/Sydney|en-AU">Australia</option>
-        <option value="Asia/Dubai|ar-AE">United Arab Emirates</option>
-    </select>
-
+    <p data-ke-size="size16">&nbsp;</p>
     <h1>Local Time:</h1>
+    <div class="selector-container">
+        <h3>Select a Country to View Local Time:</h3>
+        <select id="country-selector">
+            <option value="Asia/Seoul|ko-KR" selected>South Korea (Seoul)</option>
+            <option value="America/New_York|en-US">United States (New York / Virginia)</option>
+            <option value="America/Los_Angeles|en-US">United States (Los Angeles / Oregon)</option>
+            <option value="Asia/Singapore|en-SG">Singapore</option>
+            <option value="Asia/Tokyo|ja-JP">Japan</option>
+            <option value="Asia/Shanghai|zh-CN">China</option>
+            <option value="Asia/Manila|en-PH">Philippines</option>
+            <option value="Europe/London|en-GB">United Kingdom</option>
+            <option value="Europe/Paris|fr-FR">France</option>
+            <option value="Australia/Sydney|en-AU">Australia</option>
+            <option value="Asia/Dubai|ar-AE">United Arab Emirates</option>
+        </select>
+    </div>
+
     <div class="time-display-container">
         <div class="time-box local-time" id="time-display">Loading Local Time...</div>
         <div class="time-box timezone-info" id="timezone-info">Loading Timezone Information...</div>
@@ -140,5 +150,8 @@
         selector.addEventListener("change", updateLocalTime);
         initialize();
     </script>
+    <p data-ke-size="size16">&nbsp;</p>
+    <p data-ke-size="size16">&nbsp;</p>
+    <p data-ke-size="size16">&nbsp;</p>
 </body>
 </html>
