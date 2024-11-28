@@ -16,16 +16,17 @@
             margin: 20px 0;
             color: #333;
         }
-        .utc-time, .local-time {
-            font-size: 2em;
+        .time-box {
+            font-size: 1.8em;
             font-weight: bold;
             color: #007bff;
             background: #ffffff;
             padding: 15px 20px;
             border-radius: 8px;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            display: inline-block;
+            width: 860px;
             margin: 20px auto;
+            text-align: center;
         }
         .utc-time {
             border: 2px solid #007bff;
@@ -33,6 +34,13 @@
         .local-time {
             border: 2px solid #28a745;
             color: #28a745;
+        }
+        .timezone-info {
+            font-size: 1.2em;
+            color: #333;
+            margin-top: 10px;
+            background: #f9f9f9;
+            width: 860px;
         }
         select {
             padding: 10px;
@@ -48,7 +56,7 @@
 </head>
 <body>
     <h1>World Time Viewer</h1>
-    <div class="utc-time" id="utc-time">Loading UTC Time...</div>
+    <div class="time-box utc-time" id="utc-time">Loading UTC Time...</div>
 
     <h2>Select a Country to View Local Time</h2>
     <select id="country-selector">
@@ -66,13 +74,15 @@
     </select>
 
     <div class="time-display-container">
-        <div class="local-time" id="time-display">Loading Local Time...</div>
+        <div class="time-box local-time" id="time-display">Loading Local Time...</div>
+        <div class="time-box timezone-info" id="timezone-info">Loading Timezone Information...</div>
     </div>
 
     <script>
         const utcTimeElement = document.getElementById("utc-time");
         const selector = document.getElementById("country-selector");
         const display = document.getElementById("time-display");
+        const timezoneInfo = document.getElementById("timezone-info");
 
         // 상단 UTC 시간 업데이트
         function updateUtcTime() {
@@ -91,13 +101,15 @@
             utcTimeElement.textContent = `UTC Time: ${formatter.format(now)}`;
         }
 
-        // 선택된 국가의 지역 시간 업데이트
+        // 선택된 국가의 지역 시간 및 시차 정보 업데이트
         function updateLocalTime() {
             const selectedValue = selector.value;
             if (!selectedValue) return;
 
             const [timezone, locale] = selectedValue.split("|");
             const now = new Date();
+
+            // 지역 시간
             const formatter = new Intl.DateTimeFormat(locale, {
                 weekday: "long",
                 year: "numeric",
@@ -109,12 +121,19 @@
                 timeZone: timezone
             });
             display.textContent = `Local Time: ${formatter.format(now)}`;
+
+            // 표준 시간 및 시차
+            const utcOffset = now.toLocaleString("en-US", { timeZone: timezone, timeZoneName: "short" }).split(" ");
+            const offsetHours = new Date().getTimezoneOffset() / -60;
+            const timezoneName = utcOffset.pop(); // 표준 시간 (예: UTC+9)
+
+            timezoneInfo.textContent = `Standard Time: ${timezoneName}, Offset from UTC: ${offsetHours >= 0 ? "+" : ""}${offsetHours} hours`;
         }
 
         // 초기화 및 이벤트 바인딩
         selector.addEventListener("change", () => {
             updateLocalTime();
-            setInterval(updateLocalTime, 1000); // 1초마다 로컬 시간 업데이트
+            setInterval(updateLocalTime, 1000); // 1초마다 로컬 시간 및 정보 업데이트
         });
 
         // 초기 로딩 시 서울 시간 표시
