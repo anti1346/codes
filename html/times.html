@@ -52,18 +52,21 @@
 
     <h2>Select a Country to View Local Time</h2>
     <select id="country-selector">
-        <option value="" disabled selected>Select a country</option>
-        <option value="America/New_York|en-US">United States (English)</option>
+        <option value="Asia/Seoul|ko-KR" selected>South Korea (Seoul)</option>
+        <option value="America/New_York|en-US">United States (Virginia)</option>
+        <option value="America/Los_Angeles|en-US">United States (Oregon)</option>
+        <option value="Asia/Singapore|en-SG">Singapore</option>
+        <option value="Asia/Tokyo|ja-JP">Japan</option>
+        <option value="Asia/Shanghai|zh-CN">China</option>
+        <option value="Asia/Manila|en-PH">Philippines</option>
         <option value="Europe/London|en-GB">United Kingdom (English)</option>
         <option value="Europe/Paris|fr-FR">France (French)</option>
-        <option value="Asia/Tokyo|ja-JP">Japan (Japanese)</option>
-        <option value="Asia/Seoul|ko-KR">South Korea (Korean)</option>
         <option value="Australia/Sydney|en-AU">Australia (English)</option>
         <option value="Asia/Dubai|ar-AE">United Arab Emirates (Arabic)</option>
     </select>
 
     <div class="time-display-container">
-        <div class="local-time" id="time-display">Please select a country.</div>
+        <div class="local-time" id="time-display">Loading Local Time...</div>
     </div>
 
     <script>
@@ -114,9 +117,15 @@
             setInterval(updateLocalTime, 1000); // 1초마다 로컬 시간 업데이트
         });
 
-        // 1초마다 UTC 시간 업데이트
-        setInterval(updateUtcTime, 1000);
-        updateUtcTime();
+        // 초기 로딩 시 서울 시간 표시
+        function initialize() {
+            updateUtcTime();
+            updateLocalTime();
+            setInterval(updateUtcTime, 1000); // 1초마다 UTC 시간 업데이트
+            setInterval(updateLocalTime, 1000); // 1초마다 로컬 시간 업데이트
+        }
+
+        initialize();
     </script>
 </body>
 </html>
