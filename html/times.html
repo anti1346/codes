@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Time Viewer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,7 +16,7 @@
             color: #333;
         }
         .time-box {
-            font-size: 1.6em;
+            font-size: 1.8em;
             font-weight: bold;
             color: #007bff;
             background: #ffffff;
@@ -57,14 +56,14 @@
 <body>
     <p data-ke-size="size16">&nbsp;</p>
     <p data-ke-size="size16">&nbsp;</p>
-    <h1>World Time Viewer</h1>
+    <h1>UTC Time: </h1>
     <div class="time-box utc-time" id="utc-time">Loading UTC Time...</div>
 
     <h2>Select a Country to View Local Time</h2>
     <select id="country-selector">
         <option value="Asia/Seoul|ko-KR" selected>South Korea (Seoul)</option>
-        <option value="America/New_York|en-US">United States (Virginia)</option>
-        <option value="America/Los_Angeles|en-US">United States (Oregon)</option>
+        <option value="America/New_York|en-US">United States (New York / Virginia)</option>
+        <option value="America/Los_Angeles|en-US">United States (Los Angeles / Oregon)</option>
         <option value="Asia/Singapore|en-SG">Singapore</option>
         <option value="Asia/Tokyo|ja-JP">Japan</option>
         <option value="Asia/Shanghai|zh-CN">China</option>
@@ -74,6 +73,8 @@
         <option value="Australia/Sydney|en-AU">Australia (English)</option>
         <option value="Asia/Dubai|ar-AE">United Arab Emirates (Arabic)</option>
     </select>
+
+    <h1>Local Time: </h1>
 
     <div class="time-display-container">
         <div class="time-box local-time" id="time-display">Loading Local Time...</div>
@@ -100,7 +101,7 @@
                 timeZone: "UTC",
                 timeZoneName: "short"
             });
-            utcTimeElement.textContent = `UTC Time: ${formatter.format(now)}`;
+            utcTimeElement.textContent = `${formatter.format(now)}`;
         }
 
         // 선택된 국가의 지역 시간 및 시차 정보 업데이트
@@ -122,7 +123,7 @@
                 second: "2-digit",
                 timeZone: timezone
             });
-            display.textContent = `Local Time: ${formatter.format(now)}`;
+            display.textContent = `${formatter.format(now)}`;
 
             // 표준 시간 및 시차
             const utcOffset = now.toLocaleString("en-US", { timeZone: timezone, timeZoneName: "short" }).split(" ");
