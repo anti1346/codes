@@ -2,7 +2,9 @@
 set -euo pipefail
 
 # 변수 정의
-backup_dir="/tmp/$(hostname)-$(date +%Y%m%d)"
+host_name=$(hostname)
+ip_address=$(hostname -I | awk '{print $1}') # 첫 번째 IP 주소 가져오기
+backup_dir="/tmp/${host_name}_${ip_address}_$(date +%Y%m%d)"
 backup_archive="${backup_dir}.tar.gz"
 nginx_config_dir="/etc/nginx"
 
