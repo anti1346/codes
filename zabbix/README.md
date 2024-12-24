@@ -20,7 +20,10 @@ systemctl restart zabbix-agent2
 
 ### zabbix agent
 ```
-zabbix_agentd -t z_uptime
+zabbix_agent2 -t z_ping
+```
+```
+zabbix_agent2 -t z_uptime
 ```
 
 ## Zabbix Server
