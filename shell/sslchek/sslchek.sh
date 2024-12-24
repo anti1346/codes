@@ -39,3 +39,7 @@ remaining_days=$((diff / 86400))
 
 # Output the remaining days
 echo "Days until SSL certificate expires: $remaining_days"
+
+
+### Shell Execute Command
+# curl -fsSL https://raw.githubusercontent.com/anti1346/codes/refs/heads/main/shell/sslchek/sslchek.sh | bash -s scbyun.com
