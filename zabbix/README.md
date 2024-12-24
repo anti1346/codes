@@ -7,7 +7,10 @@
 vim /etc/zabbix/zabbix_agent2.conf
 ```
 ```
-echo "UserParameter=z_ping[*],echo \$1" | tee -a /etc/zabbix/zabbix_agent2.conf
+echo "UserParameter=z_echo[*],echo \$1" | tee -a /etc/zabbix/zabbix_agent2.conf
+```
+```
+echo "UserParameter=z_ping[*],ping \$1" | tee -a /etc/zabbix/zabbix_agent2.conf
 ```
 ```
 echo "UserParameter=z_uptime,uptime" | tee -a /etc/zabbix/zabbix_agent2.conf
@@ -26,23 +29,29 @@ systemctl restart zabbix-agent2
 
 ### zabbix agent
 ```
-zabbix_agent2 -t z_ping
+zabbix_agent2 -t z_echo[test string]
+```
+```
+zabbix_agent2 -t z_ping[127.0.0.1]
 ```
 ```
 zabbix_agent2 -t z_uptime
 ```
 ```
-zabbix_agent2 -t z_command
+zabbix_agent2 -t z_command[date]
 ```
 
 ## Zabbix Server
 ### zabbix server
 ```
-zabbix_get -s 211.239.167.24 -k "z_command"
+zabbix_get -s {zabbix agent ip} -k "z_echo[test string]"
 ```
 ```
-zabbix_get -s 211.239.167.24 -k "z_ping"
+zabbix_get -s {zabbix agent ip} -k "z_ping[127.0.0.1]"
 ```
 ```
-zabbix_get -s 211.239.167.24 -k "z_uptime"
+zabbix_get -s {zabbix agent ip} -k "z_uptime"
+```
+```
+zabbix_get -s {zabbix agent ip} -k "z_command[date]"
 ```
