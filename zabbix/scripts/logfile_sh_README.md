@@ -14,10 +14,10 @@ chmod +x logfile.sh
 ```
 
 #### Syslog severity levels
-##### Emergency	: 시스템을 사용할 수 없습니다
-##### Alert	: 즉각적인 조치를 취해야 합니다.
-##### Critical : 중요한 조건
-##### Error	: 오류 조건
+- Emergency	: 시스템을 사용할 수 없습니다
+- Alert	: 즉각적인 조치를 취해야 합니다.
+- Critical : 중요한 조건
+- Error	: 오류 조건
 
 ### UserParameter 추가
 ```
