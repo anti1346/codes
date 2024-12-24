@@ -12,7 +12,7 @@ echo "UserParameter=z_echo[*],echo \$1" | tee -a /etc/zabbix/zabbix_agent2.conf
 ```
 ##### ping 명령어로 특정 IP가 응답하는지 확인 (예: 3번 시도)
 ```
-echo 'UserParameter=z_ping[*],ping -c 3 -W 3 \$1 | grep -v grep | grep "from \$1" | wc -l' | tee -a /etc/zabbix/zabbix_agent2.conf
+echo 'UserParameter=z_ping[*],ping -c 3 -W 3 \$1 | grep "from $1" | wc -l' | tee -a /etc/zabbix/zabbix_agent2.conf
 ```
 ##### 시스템의 uptime 정보 출력
 ```
