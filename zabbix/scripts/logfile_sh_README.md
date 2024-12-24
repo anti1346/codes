@@ -24,7 +24,7 @@ systemctl restart zabbix-agent2
 zabbix_agent2 -t z_logfile[/var/log/syslog,5,Starting]
 ```
 ```
-export ZABBIX_AGENT_IP=211.239.167.24
+export ZABBIX_AGENT_IP=127.0.0.1
 ```
 ```
 zabbix_get -s ${ZABBIX_AGENT_IP} -k "z_logfile[/var/log/syslog,5,Starting]"
