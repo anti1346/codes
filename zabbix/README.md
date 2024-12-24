@@ -44,14 +44,20 @@ zabbix_agent2 -t z_command[date]
 ## Zabbix Server
 ### zabbix server
 ```
-zabbix_get -s {zabbix agent ip} -k "z_echo["test string"]"
+export ZABBIX_AGENT_IP=127.0.0.1
 ```
 ```
-zabbix_get -s {zabbix agent ip} -k "z_ping[127.0.0.1]"
+echo ${ZABBIX_AGENT_IP}
 ```
 ```
-zabbix_get -s {zabbix agent ip} -k "z_uptime"
+zabbix_get -s ${ZABBIX_AGENT_IP} -k "z_echo["test string"]"
 ```
 ```
-zabbix_get -s {zabbix agent ip} -k "z_command[date]"
+zabbix_get -s ${ZABBIX_AGENT_IP} -k "z_ping[127.0.0.1]"
+```
+```
+zabbix_get -s ${ZABBIX_AGENT_IP} -k "z_uptime"
+```
+```
+zabbix_get -s ${ZABBIX_AGENT_IP} -k "z_command[date]"
 ```
