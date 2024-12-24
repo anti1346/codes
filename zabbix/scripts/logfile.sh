@@ -31,6 +31,3 @@ tail -n 10000 "$LOG_FILE" | awk -v time="$TIME_THRESHOLD" -v pattern="$PATTERN" 
     }
 }'
 
-
-
-### Shell Execute Command
