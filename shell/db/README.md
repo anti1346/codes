@@ -15,3 +15,7 @@ NOW()
 [Fri Jan  3 15:21:42 KST 2025] Query executed successfully.
 ----------------------------------------
 ```
+
+```
+mysql_config_editor print --all
+```
