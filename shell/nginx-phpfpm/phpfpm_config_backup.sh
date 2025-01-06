@@ -5,9 +5,11 @@ set -euo pipefail
 host_name=$(hostname)
 ip_address=$(hostname -I | awk '{print $1}')
 timestamp=$(date +%Y%m%d%H%M%S)
-backup_dir="/tmp/nginx_${host_name}_${ip_address}_${timestamp}"
+backup_dir="/tmp/phpfpm_${host_name}_${ip_address}_${timestamp}"
 backup_archive="${backup_dir}.tar.gz"
-nginx_config_dir="/etc/nginx"
+php_config="/etc/php.ini"
+phpfpm_config="/etc/php-fpm.conf"
+phpfpm_pools_dir="/etc/php-fpm.d"
 
 # 함수 정의: 에러 핸들링
 cleanup() {
@@ -21,10 +23,10 @@ echo "백업 디렉토리 생성: $backup_dir"
 mkdir -p "$backup_dir"
 
 # 파일 복사
-echo "NGINX 설정 및 SSL 디렉토리 복사 중..."
-cp -p "$nginx_config_dir/nginx.conf" "$backup_dir/" || { echo "nginx.conf 복사 실패"; exit 1; }
-cp -rp "$nginx_config_dir/conf.d" "$backup_dir/" || { echo "conf.d 복사 실패"; exit 1; }
-cp -rp "$nginx_config_dir/ssl" "$backup_dir/" || { echo "ssl 디렉토리 복사 실패"; exit 1; }
+echo "PHP-FPM 설정 및 PHP-FPM POOL 디렉토리 복사 중..."
+cp -p "$php_config" "$backup_dir/" || { echo "php.ini 복사 실패"; exit 1; }
+cp -p "$phpfpm_config" "$backup_dir/" || { echo "php-fpm.conf 복사 실패"; exit 1; }
+cp -rp "$phpfpm_pools_dir" "$backup_dir/" || { echo "php-fpm.d 디렉토리 복사 실패"; exit 1; }
 
 # 압축
 echo "백업 압축 생성: $backup_archive"
