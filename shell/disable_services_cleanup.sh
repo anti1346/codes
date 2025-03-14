@@ -11,7 +11,7 @@ echo "[INFO] All required commands are available."
 # 중지 및 비활성화할 서비스 목록
 SERVICES=(
     snapd.socket snapd.service snapd.seeded.service
-    ModemManager multipathd.socket multipathd systemd-resolved
+    ModemManager multipathd.socket multipathd systemd-resolved polkit
 )
 
 echo "[INFO] Disabling and stopping unnecessary services..."
@@ -29,7 +29,7 @@ echo "[INFO] Services disabled successfully."
 
 # 패키지 제거
 echo "[INFO] Removing unnecessary packages..."
-PACKAGES=(snapd modemmanager multipath-tools)
+PACKAGES=(snapd modemmanager multipath-tools polkitd)
 for package in "${PACKAGES[@]}"; do
     if dpkg -l | grep -q "^ii  $package"; then
         echo "[INFO] Removing $package..."
