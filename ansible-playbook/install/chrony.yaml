@@ -1,0 +1,53 @@
+---
+- name: Chrony 설치 및 구성
+  hosts: all
+  become: yes
+  gather_facts: true
+
+  tasks:
+    - name: Chrony 설치
+      package:
+        name: chrony
+        state: present
+      when: ansible_distribution in ['Ubuntu', 'CentOS']
+
+    - name: Timezone을 Asia/Seoul로 설정
+      command: timedatectl set-timezone Asia/Seoul
+      when: ansible_distribution in ['Ubuntu', 'CentOS']
+      changed_when: false
+
+    - name: chrony.conf 생성
+      template:
+        src: "{{ playbook_dir }}/sourcedir/chrony/chrony.conf.j2"
+        dest: "{{ '/etc/chrony.conf' if ansible_distribution == 'CentOS' else '/etc/chrony/chrony.conf' }}"
+      notify: Restart Chrony
+
+    - name: Chrony 서비스 활성화 및 시작
+      service:
+        name: chronyd
+        enabled: yes
+        state: started
+
+    - name: Chrony 소스 확인
+      command: chronyc sources -v
+      register: chrony_sources_result
+      changed_when: false
+
+    - name: Chrony 소스 결과 출력
+      debug:
+        var: chrony_sources_result.stdout_lines
+
+    - name: 현재 시스템 시간 확인
+      command: date
+      register: current_time
+      changed_when: false
+
+    - name: 현재 시스템 시간 출력
+      debug:
+        msg: "현재 시스템 시간: {{ current_time.stdout }}"
+
+  handlers:
+    - name: Restart Chrony
+      service:
+        name: chronyd
+        state: restarted
