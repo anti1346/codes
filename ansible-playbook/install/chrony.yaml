@@ -18,7 +18,7 @@
 
     - name: chrony.conf 생성
       template:
-        src: "{{ playbook_dir }}/sourcedir/chrony/chrony.conf.j2"
+        src: "{{ playbook_dir }}/jinja2/chrony/chrony.conf.j2"
         dest: "{{ '/etc/chrony.conf' if ansible_distribution == 'CentOS' else '/etc/chrony/chrony.conf' }}"
       notify: Restart Chrony
 
