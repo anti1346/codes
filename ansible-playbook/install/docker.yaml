@@ -1,0 +1,73 @@
+---
+- name: Docker 설치 및 설정
+  hosts: all
+  become: yes
+  gather_facts: true
+
+  vars:
+    docker_user: ubuntu
+
+  tasks:
+    - name: "필수 패키지 설치 (Ubuntu)"
+      apt:
+        name:
+          - curl
+          - ca-certificates
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: "필수 패키지 설치 (CentOS)"
+      yum:
+        name:
+          - curl
+          - ca-certificates
+        state: present
+      when: ansible_distribution == "CentOS"
+
+    - name: Docker 설치 스크립트 다운로드
+      get_url:
+        url: https://get.docker.com
+        dest: /tmp/get-docker.sh
+        mode: '0755'
+
+    - name: Docker 설치 실행
+      command: bash /tmp/get-docker.sh
+      args:
+        creates: /usr/bin/docker
+
+    - name: 설치 스크립트 삭제
+      file:
+        path: /tmp/get-docker.sh
+        state: absent
+
+    - name: Docker 그룹에 사용자 추가
+      user:
+        name: "{{ docker_user }}"
+        groups: docker
+        append: yes
+
+    - name: Docker 서비스 활성화 및 시작
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Docker 버전 확인
+      command: docker version --format '{{ .Server.Version }}'
+      register: docker_version
+      changed_when: false
+
+    - name: Docker 버전 출력
+      debug:
+        msg: "Docker Server Version: {{ docker_version.stdout }}"
+
+    - name: Docker Compose 버전 확인
+      command: docker compose version
+      register: docker_compose_version
+      changed_when: false
+      failed_when: docker_compose_version.rc != 0
+
+    - name: Docker Compose 버전 출력
+      debug:
+        msg: "Docker Compose Version: {{ docker_compose_version.stdout }}"
