@@ -1,0 +1,77 @@
+---
+- name: 기본 시스템 그룹 제거
+  hosts: all
+  become: true
+  gather_facts: no
+
+  vars:
+    remove_groups:
+      - audio
+      - cdrom
+      - dialout
+      - dip
+      - fax
+      - floppy
+      - gnats
+      - irc
+      - landscape
+      - operator
+      - plugdev
+      - rdma
+      - render
+      - sgx
+      - src
+      - tape
+      - video
+      - voice
+
+  tasks:
+    - name: 현재 시스템 그룹 목록 가져오기
+      command: getent group
+      register: current_groups
+      changed_when: false
+      tags:
+        - get_groups
+
+    - name: 그룹 목록 파싱
+      set_fact:
+        existing_groups: "{{ current_groups.stdout_lines | map('split', ':') | map('first') | list }}"
+      tags:
+        - get_groups
+
+    - name: 모든 그룹 표시 (for debugging)
+      debug:
+        var: existing_groups
+      tags:
+        - get_groups
+
+    - name: 제거할 그룹 필터링
+      set_fact:
+        target_groups: "{{ remove_groups | select('in', existing_groups) | list }}"
+      tags:
+        - filter_groups
+
+    - name: 그룹 사용 여부 확인
+      shell: "getent group {{ item }} | awk -F: '{print $4}'"
+      register: group_users
+      changed_when: false
+      loop: "{{ target_groups }}"
+      tags:
+        - check_group_usage
+
+    - name: 디버깅 - 그룹 사용 여부 확인
+      debug:
+        msg: "Group: {{ item.item }}, Users: {{ item.stdout | default('None') }}"
+      loop: "{{ group_users.results }}"
+      tags:
+        - debug_group_usage
+
+    - name: 사용자가 없는 경우 그룹 제거
+      group:
+        name: "{{ item.item }}"
+        state: absent
+      when: item.stdout | trim == ""
+      loop: "{{ group_users.results }}"
+      ignore_errors: yes
+      tags:
+        - remove_unnecessary_groups

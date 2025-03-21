@@ -1,0 +1,53 @@
+---
+- name: 기본 시스템 사용자 제거
+  hosts: all
+  become: true
+  gather_facts: no
+
+  vars:
+    remove_users:
+      - games
+      - gopher
+      - gnats
+      - irc
+      - landscape
+      - list
+      - lp
+      - mail
+      - news
+      - proxy
+      - usbmux
+      - uucp
+      - uuidd
+
+  tasks:
+    - name: 현재 시스템 사용자 목록 가져오기
+      ansible.builtin.getent:
+        database: passwd
+      register: current_users
+      changed_when: false
+      tags:
+        - get_users
+
+    - name: 현재 사용자 목록 출력 (디버깅용)
+      debug:
+        var: current_users.ansible_facts.getent_passwd.keys()
+      tags:
+        - get_users
+
+    - name: 삭제할 사용자 확인 및 제거
+      ansible.builtin.user:
+        name: "{{ item }}"
+        state: absent
+        remove: true
+      loop: "{{ remove_users }}"
+      when: item in current_users.ansible_facts.getent_passwd.keys()
+      ignore_errors: yes
+      tags:
+        - remove_users
+
+    - name: 사용자 삭제 완료 메시지
+      debug:
+        msg: "불필요한 사용자 제거 완료"
+      tags:
+        - remove_users
