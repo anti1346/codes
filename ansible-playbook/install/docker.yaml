@@ -54,7 +54,7 @@
         state: started
 
     - name: Docker 버전 확인
-      command: docker version --format '{{ .Server.Version }}'
+      command: docker version --format '{{ "{{ .Server.Version }}" }}'
       register: docker_version
       changed_when: false
 
@@ -70,4 +70,4 @@
 
     - name: Docker Compose 버전 출력
       debug:
-        msg: "Docker Compose Version: {{ docker_compose_version.stdout }}"
+        msg: "{{ docker_compose_version.stdout }}"
